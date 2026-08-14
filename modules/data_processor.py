@@ -57,7 +57,7 @@ def clean_and_validate(df):
         cleaned_df = cleaned_df.drop_duplicates()
     health_report["duplicates_removed"] = int(dup_count)
     
-    # 3. String trimming & Date Detection
+    # 3. String trimming, Date & Numeric Detection
     for col in cleaned_df.columns:
         if cleaned_df[col].dtype == 'object':
             cleaned_df[col] = cleaned_df[col].astype(str).str.strip()
@@ -69,10 +69,15 @@ def clean_and_validate(df):
                     if converted.notnull().sum() > 0.5 * len(cleaned_df):
                         cleaned_df[col] = converted
                         health_report["date_cols_detected"].append(col)
+                        continue
                 except Exception:
                     pass
-        elif pd.api.types.is_datetime64_any_dtype(cleaned_df[col]):
-            health_report["date_cols_detected"].append(col)
+            
+            # Attempt numeric conversion (stripping $, commas, %)
+            clean_str = cleaned_df[col].str.replace('$', '', regex=False).str.replace(',', '', regex=False).str.replace('%', '', regex=False).str.strip()
+            numeric_converted = pd.to_numeric(clean_str, errors='coerce')
+            if numeric_converted.notnull().sum() > 0.5 * len(cleaned_df):
+                cleaned_df[col] = numeric_converted
 
     # 4. Impute Missing Values
     missing_count = cleaned_df.isnull().sum().sum()
@@ -102,6 +107,7 @@ def clean_and_validate(df):
     health_report["final_cols"] = len(cleaned_df.columns)
 
     return cleaned_df, health_report
+
 
 def get_smart_column_mapping(df):
     """

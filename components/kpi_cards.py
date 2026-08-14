@@ -16,13 +16,17 @@ def render_kpi_cards(df):
     customer_col = mapping.get("customer")
     category_col = mapping.get("category")
     
-    total_sales = df[sales_col].sum() if sales_col else 0
-    total_profit = df[profit_col].sum() if profit_col else 0
+    sales_series = pd.to_numeric(df[sales_col].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False), errors='coerce').fillna(0) if sales_col else None
+    profit_series = pd.to_numeric(df[profit_col].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False), errors='coerce').fillna(0) if profit_col else None
+    
+    total_sales = sales_series.sum() if sales_series is not None else 0
+    total_profit = profit_series.sum() if profit_series is not None else 0
     total_orders = len(df)
     
     profit_margin = (total_profit / total_sales * 100) if (sales_col and profit_col and total_sales > 0) else 0
     avg_order_val = (total_sales / total_orders) if (sales_col and total_orders > 0) else 0
     total_customers = df[customer_col].nunique() if customer_col else (df[category_col].nunique() if category_col else total_orders)
+
     
     col1, col2, col3, col4, col5 = st.columns(5)
     

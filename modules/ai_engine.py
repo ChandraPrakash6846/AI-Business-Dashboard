@@ -24,9 +24,10 @@ def generate_statistical_insights(df):
     region_col = mapping.get("region")
     
     if sales_col:
-        total_sales = df[sales_col].sum()
-        avg_sales = df[sales_col].mean()
-        max_sales_row = df.loc[df[sales_col].idxmax()]
+        # Coerce to numeric in case column is string/object
+        s_series = pd.to_numeric(df[sales_col].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False), errors='coerce').fillna(0)
+        total_sales = s_series.sum()
+        avg_sales = s_series.mean()
         
         insights.append({
             "type": "positive",
@@ -34,22 +35,26 @@ def generate_statistical_insights(df):
             "description": f"The dataset records a total cumulative {sales_col} of **${total_sales:,.2f}** with an average transaction value of **${avg_sales:,.2f}**."
         })
         
-        if category_col:
-            cat_perf = df.groupby(category_col)[sales_col].sum().sort_values(ascending=False)
-            top_cat = cat_perf.index[0]
-            top_cat_val = cat_perf.iloc[0]
-            top_cat_pct = (top_cat_val / total_sales) * 100
-            
-            insights.append({
-                "type": "info",
-                "title": f"Top Performing Category: {top_cat}",
-                "description": f"**{top_cat}** leads sales generation with **${top_cat_val:,.2f}**, contributing **{top_cat_pct:.1f}%** of overall volume."
-            })
+        if category_col and total_sales > 0:
+            df_temp = df.copy()
+            df_temp['_sales_num'] = s_series
+            cat_perf = df_temp.groupby(category_col)['_sales_num'].sum().sort_values(ascending=False)
+            if not cat_perf.empty:
+                top_cat = cat_perf.index[0]
+                top_cat_val = cat_perf.iloc[0]
+                top_cat_pct = (top_cat_val / total_sales) * 100
+                
+                insights.append({
+                    "type": "info",
+                    "title": f"Top Performing Category: {top_cat}",
+                    "description": f"**{top_cat}** leads sales generation with **${top_cat_val:,.2f}**, contributing **{top_cat_pct:.1f}%** of overall volume."
+                })
             
     # 2. Profitability & Margin Analysis
     if profit_col:
-        total_profit = df[profit_col].sum()
-        negative_profit = df[df[profit_col] < 0]
+        p_series = pd.to_numeric(df[profit_col].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False), errors='coerce').fillna(0)
+        total_profit = p_series.sum()
+        negative_profit = df[p_series < 0]
         
         if total_profit > 0:
             insights.append({
@@ -63,6 +68,7 @@ def generate_statistical_insights(df):
                 "title": "Unprofitable Operations Alert",
                 "description": f"Overall net profit is negative (**${total_profit:,.2f}**). Immediate cost restructuring is recommended."
             })
+
             
         if not negative_profit.empty:
             loss_pct = (len(negative_profit) / len(df)) * 100
