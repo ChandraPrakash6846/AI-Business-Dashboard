@@ -10,8 +10,11 @@ def create_db_engine(db_type, host=None, port=None, database=None, username=None
             raise ValueError("SQLite database file path is required.")
         import os
         abs_path = os.path.abspath(sqlite_path).replace('\\', '/')
+        if os.path.isdir(abs_path):
+            raise ValueError(f"The path '{sqlite_path}' is a folder directory, not a .db database file. Please specify a database file (e.g. C:/path/to/database.db).")
         os.makedirs(os.path.dirname(abs_path), exist_ok=True)
         connection_string = f"sqlite:///{abs_path}"
+
 
     elif db_type == "PostgreSQL":
         connection_string = f"postgresql://{username}:{password}@{host}:{port}/{database}"

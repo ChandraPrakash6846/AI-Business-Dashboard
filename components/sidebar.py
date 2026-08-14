@@ -97,12 +97,11 @@ def render_sidebar():
             st.sidebar.warning("Sample dataset file not found.")
 
     elif data_source == "Connect SQL Database":
-        db_type = st.sidebar.selectbox("DB Engine", ["SQLite", "PostgreSQL", "MySQL"])
+        db_type = st.sidebar.selectbox("DB Engine", ["SQLite", "MySQL", "PostgreSQL"])
         if db_type == "SQLite":
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
-            db_file = st.sidebar.text_input("Database File Path", value=default_db_path)
-
-            if st.sidebar.button("Connect & Fetch Tables"):
+            db_file = st.sidebar.text_input("Database File Path (.db)", value=default_db_path)
+            if st.sidebar.button("Connect & Fetch Tables", type="primary"):
                 try:
                     engine = create_db_engine("SQLite", sqlite_path=db_file)
                     tables = list_tables(engine)
@@ -111,6 +110,25 @@ def render_sidebar():
                     st.sidebar.success(f"Connected! Found {len(tables)} tables.")
                 except Exception as e:
                     st.sidebar.error(f"Connection failed: {str(e)}")
+
+        elif db_type in ["MySQL", "PostgreSQL"]:
+            default_port = 3306 if db_type == "MySQL" else 5432
+            host = st.sidebar.text_input("Host", value="localhost")
+            port = st.sidebar.number_input("Port", value=default_port, step=1)
+            username = st.sidebar.text_input("Username", value="root")
+            password = st.sidebar.text_input("Password", type="password")
+            database = st.sidebar.text_input("Database Name", value="classicmodels")
+            
+            if st.sidebar.button(f"Connect to {db_type}", type="primary"):
+                try:
+                    engine = create_db_engine(db_type, host=host, port=port, database=database, username=username, password=password)
+                    tables = list_tables(engine)
+                    st.session_state["sql_tables"] = tables
+                    st.session_state["sql_engine"] = engine
+                    st.sidebar.success(f"Connected to {db_type}! Found {len(tables)} tables.")
+                except Exception as e:
+                    st.sidebar.error(f"{db_type} Connection error: {str(e)}")
+
 
         if "sql_tables" in st.session_state and st.session_state["sql_tables"]:
             selected_table = st.sidebar.selectbox("Select Table", st.session_state["sql_tables"])
