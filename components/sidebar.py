@@ -106,7 +106,6 @@ def render_sidebar():
         )
 
         if sql_mode == "Local SQLite Database or .sql Script":
-
             uploaded_dbs = st.sidebar.file_uploader(
                 "Upload .db, .sqlite or .sql Script File(s)",
                 type=["db", "sqlite", "sqlite3", "sql"],
@@ -116,21 +115,15 @@ def render_sidebar():
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
             db_file_path = st.sidebar.text_input("Or Enter Database / .sql File Path", value=default_db_path)
             
-            if st.sidebar.button("Connect & Load SQL Database(s)", type="primary"):
+            if uploaded_dbs or st.sidebar.button("Connect & Load SQL Database(s)", type="primary"):
                 try:
-                    from modules.sql_connector import execute_sql_dump_script
+                    from modules.sql_connector import execute_sql_dump_script, list_tables, load_table_data
+                    from modules.data_processor import merge_multiple_datasets
+
                     temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imported_sql_dump.db")).replace('\\', '/')
                     
                     if uploaded_dbs and len(uploaded_dbs) > 0:
-                        # Clear old dump if exists
-                        if os.path.exists(temp_db_path):
-                            try:
-                                os.remove(temp_db_path)
-                            except Exception:
-                                pass
-
                         engine = create_db_engine("SQLite", sqlite_path=temp_db_path)
-                        
                         for uploaded_db in uploaded_dbs:
                             fname = uploaded_db.name.lower()
                             if fname.endswith(".sql"):
@@ -152,9 +145,20 @@ def render_sidebar():
                     tables = list_tables(engine)
                     st.session_state["sql_tables"] = tables
                     st.session_state["sql_engine"] = engine
-                    st.sidebar.success(f"Successfully loaded! Found {len(tables)} tables.")
+
+                    if tables:
+                        table_dfs = [load_table_data(engine, t) for t in tables]
+                        if len(tables) > 1:
+                            df = merge_multiple_datasets(table_dfs, mode="join")
+                            dataset_name = f"Smart Relational Joined ({len(tables)} SQL Tables)"
+                            st.sidebar.success(f"Multi-SQL Joined {len(tables)} tables ➔ {len(df)} rows")
+                        else:
+                            df = table_dfs[0]
+                            dataset_name = f"SQL Table: {tables[0]}"
+                            st.sidebar.success(f"Loaded SQL Table `{tables[0]}` ({len(df)} rows)")
+
                 except Exception as e:
-                    st.sidebar.error(f"SQL Loading failed: {str(e)}")
+                    st.sidebar.error(f"SQL Loading error: {str(e)}")
 
         elif sql_mode == "Remote MySQL / PostgreSQL Server":
             db_type = st.sidebar.selectbox("DB Engine", ["MySQL", "PostgreSQL"])
@@ -178,23 +182,14 @@ def render_sidebar():
         if "sql_tables" in st.session_state and st.session_state["sql_tables"]:
             tables = st.session_state["sql_tables"]
             sql_view_options = ["Smart Relational Joined Multi-Table View (All Tables Auto-Joined)"] + tables if len(tables) > 1 else tables
-            selected_table_option = st.sidebar.selectbox("Select Active SQL Analysis View", sql_view_options)
+            selected_table_option = st.sidebar.selectbox("Select Active SQL View", sql_view_options)
             
-            if st.sidebar.button("📊 Load & Analyze Selected SQL View", type="secondary") or df is None:
+            if selected_table_option != "Smart Relational Joined Multi-Table View (All Tables Auto-Joined)":
                 engine = st.session_state["sql_engine"]
-                if selected_table_option == "Smart Relational Joined Multi-Table View (All Tables Auto-Joined)":
-                    try:
-                        from modules.data_processor import merge_multiple_datasets
-                        table_dfs = [load_table_data(engine, t) for t in tables]
-                        df = merge_multiple_datasets(table_dfs, mode="join")
-                        dataset_name = f"SQL Multi-Table Smart Joined ({len(tables)} Tables)"
-                        st.sidebar.success(f"Multi-Table Joined ➔ {len(df)} total rows")
-                    except Exception as e:
-                        st.sidebar.error(f"Multi-Table Join error: {str(e)}")
-                else:
-                    df = load_table_data(engine, selected_table_option)
-                    dataset_name = f"SQL Table: {selected_table_option}"
-                    st.sidebar.info(f"Active SQL Table: `{selected_table_option}` ({len(df)} rows)")
+                df = load_table_data(engine, selected_table_option)
+                dataset_name = f"SQL Table: {selected_table_option}"
+                st.sidebar.info(f"Active SQL Table: `{selected_table_option}` ({len(df)} rows)")
+
 
     st.sidebar.divider()
 
