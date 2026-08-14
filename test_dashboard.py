@@ -43,13 +43,21 @@ def test_all():
     print(f"[SUCCESS] NL Query Executed: {summary}")
     assert not res_df.empty, "NL query returned empty dataframe"
 
-    # 4. Test SQLite Database
+    # 4. Test SQLite Database & Built-in SQL Seeder
+    from modules.sql_connector import seed_sample_sql_database, list_tables
+    db_test_path = os.path.join(os.path.dirname(__file__), "test_sample.db")
+    sql_engine = seed_sample_sql_database(db_test_path)
+    sql_tables = list_tables(sql_engine)
+    print(f"[SUCCESS] Built-in SQL Database Seeded: Found tables {sql_tables}")
+    assert "sales_orders" in sql_tables and "product_catalog" in sql_tables, "SQL Seeder failed"
+
     init_db()
     kpis = {"Total Sales": "$25,000.00", "Net Profit": "$5,000.00"}
     save_analysis_history("test_dataset.csv", len(df_clean), len(df_clean.columns), health, insights, kpis)
     history = fetch_history(5)
     print(f"[SUCCESS] Database History Records Fetched: {len(history)} items.")
     assert len(history) > 0, "History database test failed"
+
 
     # 5. Test Export Generators (PDF & Excel)
     pdf_bytes = export_to_pdf(df_clean, health, kpis, insights)
