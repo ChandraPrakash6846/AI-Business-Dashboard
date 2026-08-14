@@ -180,13 +180,13 @@ def get_smart_column_mapping(df):
         return None
 
     mapping = {
-        "sales": match(['sales', 'revenue', 'turnover', 'amount', 'total_amount', 'priceeach', 'price']),
-        "profit": match(['profit', 'margin', 'gain', 'net_income', 'earnings']),
+        "sales": match(['sales', 'revenue', 'turnover', 'amount', 'total_amount', 'rental_rate', 'priceeach', 'price', 'rate', 'cost']),
+        "profit": match(['profit', 'margin', 'gain', 'net_income', 'earnings', 'amount']),
         "quantity": match(['qty', 'quantity', 'quantityordered', 'count', 'units']),
-        "date": match(['date', 'time', 'orderdate', 'day', 'timestamp']),
-        "category": match(['category', 'productline', 'type', 'group', 'product_type', 'department']),
-        "region": match(['region', 'country', 'state', 'city', 'location', 'zone']),
-        "customer": match(['customername', 'customer_name', 'customer', 'client', 'user', 'buyer'])
+        "date": match(['date', 'time', 'orderdate', 'rental_date', 'payment_date', 'last_update', 'day', 'timestamp']),
+        "category": match(['category', 'productline', 'type', 'group', 'product_type', 'department', 'rating', 'title']),
+        "region": match(['region', 'country', 'state', 'city', 'location', 'zone', 'district']),
+        "customer": match(['customername', 'customer_name', 'customer_id', 'first_name', 'last_name', 'customer', 'client', 'user', 'buyer'])
     }
     return mapping
 
