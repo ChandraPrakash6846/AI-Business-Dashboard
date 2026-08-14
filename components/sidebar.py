@@ -104,29 +104,45 @@ def render_sidebar():
         )
 
         if sql_mode == "Local SQLite Database or .sql Script":
-            uploaded_db = st.sidebar.file_uploader("Upload .db, .sqlite or .sql Script File", type=["db", "sqlite", "sqlite3", "sql"])
+
+            uploaded_dbs = st.sidebar.file_uploader(
+                "Upload .db, .sqlite or .sql Script File(s)",
+                type=["db", "sqlite", "sqlite3", "sql"],
+                accept_multiple_files=True,
+                help="Select one or multiple .sql or .db files"
+            )
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
             db_file_path = st.sidebar.text_input("Or Enter Database / .sql File Path", value=default_db_path)
             
-            if st.sidebar.button("Connect & Load SQL Database", type="primary"):
+            if st.sidebar.button("Connect & Load SQL Database(s)", type="primary"):
                 try:
                     from modules.sql_connector import execute_sql_dump_script
-                    if uploaded_db is not None:
-                        fname = uploaded_db.name.lower()
-                        if fname.endswith(".sql"):
-                            sql_text = uploaded_db.getvalue().decode("utf-8", errors="ignore")
-                            temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imported_sql_dump.db")).replace('\\', '/')
-                            engine = execute_sql_dump_script(sql_text, temp_db_path)
-                        else:
-                            temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", f"uploaded_{uploaded_db.name}")).replace('\\', '/')
-                            with open(temp_db_path, "wb") as f_out:
-                                f_out.write(uploaded_db.getbuffer())
-                            engine = create_db_engine("SQLite", sqlite_path=temp_db_path)
+                    temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imported_sql_dump.db")).replace('\\', '/')
+                    
+                    if uploaded_dbs and len(uploaded_dbs) > 0:
+                        # Clear old dump if exists
+                        if os.path.exists(temp_db_path):
+                            try:
+                                os.remove(temp_db_path)
+                            except Exception:
+                                pass
+
+                        engine = create_db_engine("SQLite", sqlite_path=temp_db_path)
+                        
+                        for uploaded_db in uploaded_dbs:
+                            fname = uploaded_db.name.lower()
+                            if fname.endswith(".sql"):
+                                sql_text = uploaded_db.getvalue().decode("utf-8", errors="ignore")
+                                engine = execute_sql_dump_script(sql_text, temp_db_path)
+                            else:
+                                temp_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", f"uploaded_{uploaded_db.name}")).replace('\\', '/')
+                                with open(temp_file, "wb") as f_out:
+                                    f_out.write(uploaded_db.getbuffer())
+                                engine = create_db_engine("SQLite", sqlite_path=temp_file)
                     else:
                         if db_file_path.lower().endswith(".sql") and os.path.exists(db_file_path):
                             with open(db_file_path, "r", encoding="utf-8", errors="ignore") as f_in:
                                 sql_text = f_in.read()
-                            temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "imported_sql_dump.db")).replace('\\', '/')
                             engine = execute_sql_dump_script(sql_text, temp_db_path)
                         else:
                             engine = create_db_engine("SQLite", sqlite_path=db_file_path)
@@ -137,8 +153,6 @@ def render_sidebar():
                     st.sidebar.success(f"Successfully loaded! Found {len(tables)} tables.")
                 except Exception as e:
                     st.sidebar.error(f"SQL Loading failed: {str(e)}")
-
-
 
         elif sql_mode == "Remote MySQL / PostgreSQL Server":
             db_type = st.sidebar.selectbox("DB Engine", ["MySQL", "PostgreSQL"])
@@ -160,15 +174,28 @@ def render_sidebar():
                     st.sidebar.error(f"{db_type} Connection error: {str(e)}")
 
         if "sql_tables" in st.session_state and st.session_state["sql_tables"]:
-            selected_table = st.sidebar.selectbox("Select SQL Table to Load", st.session_state["sql_tables"])
-            if st.sidebar.button("📊 Load & Analyze SQL Table", type="secondary") or df is None:
+            tables = st.session_state["sql_tables"]
+            sql_view_options = ["Smart Relational Joined Multi-Table View (All Tables Auto-Joined)"] + tables if len(tables) > 1 else tables
+            selected_table_option = st.sidebar.selectbox("Select Active SQL Analysis View", sql_view_options)
+            
+            if st.sidebar.button("📊 Load & Analyze Selected SQL View", type="secondary") or df is None:
                 engine = st.session_state["sql_engine"]
-                df = load_table_data(engine, selected_table)
-                dataset_name = f"SQL Table: {selected_table}"
-                st.sidebar.info(f"Active SQL Table: `{selected_table}` ({len(df)} rows)")
-
+                if selected_table_option == "Smart Relational Joined Multi-Table View (All Tables Auto-Joined)":
+                    try:
+                        from modules.data_processor import merge_multiple_datasets
+                        table_dfs = [load_table_data(engine, t) for t in tables]
+                        df = merge_multiple_datasets(table_dfs, mode="join")
+                        dataset_name = f"SQL Multi-Table Smart Joined ({len(tables)} Tables)"
+                        st.sidebar.success(f"Multi-Table Joined ➔ {len(df)} total rows")
+                    except Exception as e:
+                        st.sidebar.error(f"Multi-Table Join error: {str(e)}")
+                else:
+                    df = load_table_data(engine, selected_table_option)
+                    dataset_name = f"SQL Table: {selected_table_option}"
+                    st.sidebar.info(f"Active SQL Table: `{selected_table_option}` ({len(df)} rows)")
 
     st.sidebar.divider()
+
     st.sidebar.subheader("⚙️ Dashboard Settings")
     chart_theme = st.sidebar.selectbox("Chart Color Theme", ["plotly_dark", "plotly_white", "seaborn", "ggplot2"])
     
