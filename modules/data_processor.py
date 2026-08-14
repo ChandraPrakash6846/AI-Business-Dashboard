@@ -3,9 +3,13 @@ import numpy as np
 
 def load_dataset(file_or_path):
     """
-    Load dataset from file buffer or path. Supports CSV, Excel (.xlsx, .xls), SQL scripts (.sql), and SQLite DB (.db, .sqlite).
+    Load dataset from file buffer, path, or existing DataFrame. Supports CSV, Excel (.xlsx, .xls), SQL scripts (.sql), and SQLite DB (.db, .sqlite).
     """
+    if isinstance(file_or_path, pd.DataFrame):
+        return file_or_path
+
     filename = file_or_path.lower() if isinstance(file_or_path, str) else getattr(file_or_path, 'name', '').lower()
+
 
     if filename.endswith('.csv'):
         return pd.read_csv(file_or_path)
@@ -198,9 +202,14 @@ def merge_multiple_datasets(file_list, mode="auto", join_key=None):
 
     file_tuples = []
     for idx, f in enumerate(file_list):
-        fname = getattr(f, 'name', str(f)).lower()
-        df_temp = load_dataset(f)
+        if isinstance(f, pd.DataFrame):
+            fname = f"df_table_{idx}"
+            df_temp = f
+        else:
+            fname = getattr(f, 'name', str(f)).lower()
+            df_temp = load_dataset(f)
         file_tuples.append((fname, df_temp))
+
 
     if len(file_tuples) == 1:
         return file_tuples[0][1]
