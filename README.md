@@ -32,17 +32,22 @@ This project was built to satisfy all requirements specified in the Internship A
 
 ## 🌟 Key Technical Features
 
-1. **Robust Data Pipeline & Auto-Cleaner (`modules/data_processor.py`)**
-   - Automatically handles date string parsing, string trimming, duplicate row purging, and missing value imputation without requiring user configuration.
+1. **Universal Multi-File Auto-Merger & Relational Database Auto-Joiner (`modules/data_processor.py`)**
+   - Supports uploading single or multiple files (`.csv`, `.xlsx`, `.sql`, `.db`) simultaneously.
+   - Automatically detects relational database schemas (Sakila, Northwind, ClassicModels) and performs foreign-key joins (`orders` + `orderdetails` + `customers` + `employees` + `offices`).
 
-2. **Machine Learning Anomaly Engine (`modules/ai_engine.py`)**
+2. **SQL Script (.sql) Dialect Engine (`modules/sql_connector.py`)**
+   - Parses raw `.sql` script dumps (MySQL / PostgreSQL / SQLite), strips incompatible DDL constraints, and executes statements into a unified SQLite database engine.
+
+3. **Machine Learning Anomaly Engine (`modules/ai_engine.py`)**
    - Implements Scikit-learn's `IsolationForest` unsupervised learning model to scan numerical fields for statistical business anomalies and high-risk transactions.
 
-3. **Natural Language Processing Assistant (`components/nl_query.py`)**
+4. **Natural Language Processing Assistant (`components/nl_query.py`)**
    - Translates user questions like *"Total sales by category"* or *"Profit by region"* into filtered Pandas DataFrames and renders tailored Plotly charts instantly.
 
-4. **Executive PDF & Excel Reporting Engine (`modules/export_engine.py`)**
+5. **Executive PDF & Excel Reporting Engine (`modules/export_engine.py`)**
    - Generates publication-ready PDF summaries with ReportLab and multi-tab structured Excel workbooks with openpyxl.
+
 
 ---
 
