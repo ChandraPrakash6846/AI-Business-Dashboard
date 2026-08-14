@@ -83,36 +83,68 @@ def execute_sql_dump_script(sql_content_str, sqlite_path):
     abs_path = os.path.abspath(sqlite_path).replace('\\', '/')
     os.makedirs(os.path.dirname(abs_path), exist_ok=True)
     
-    # Preprocess SQL script to strip MySQL-specific statements incompatible with SQLite
+    # 1. Strip MySQL comments and session settings
     cleaned_sql = sql_content_str
+    cleaned_sql = re.sub(r'/\*![\s\S]*?\*/;', '', cleaned_sql)
+    cleaned_sql = re.sub(r'/\*![\s\S]*?\*/', '', cleaned_sql)
+    cleaned_sql = re.sub(r'--[^\n]*\n', '\n', cleaned_sql)
+    cleaned_sql = re.sub(r'#  [^\n]*\n', '\n', cleaned_sql)
+    cleaned_sql = re.sub(r'SET\s+@[^;]+;', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'SET\s+FOREIGN_KEY_CHECKS\s*=\s*\d+;', '', cleaned_sql, flags=re.IGNORECASE)
+
+    # 2. Convert MySQL backticks `` to double quotes ""
+    cleaned_sql = cleaned_sql.replace('`', '"')
+
+    # 3. Clean MySQL DDL table options and key constraints
     cleaned_sql = re.sub(r'ENGINE\s*=\s*\w+', '', cleaned_sql, flags=re.IGNORECASE)
     cleaned_sql = re.sub(r'DEFAULT\s+CHARSET\s*=\s*\w+', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'COLLATE\s*=\s*\w+', '', cleaned_sql, flags=re.IGNORECASE)
     cleaned_sql = re.sub(r'AUTO_INCREMENT\s*=\s*\d+', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'AUTO_INCREMENT', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'UNSIGNED', '', cleaned_sql, flags=re.IGNORECASE)
     cleaned_sql = re.sub(r'LOCK\s+TABLES\s+[^;]+;', '', cleaned_sql, flags=re.IGNORECASE)
     cleaned_sql = re.sub(r'UNLOCK\s+TABLES\s*;', '', cleaned_sql, flags=re.IGNORECASE)
-    cleaned_sql = re.sub(r'/\*![\s\S]*?\*/;', '', cleaned_sql)
+
+    # Clean inline KEY/INDEX definitions inside CREATE TABLE (...) that break SQLite DDL
+    cleaned_sql = re.sub(r',\s*(?:UNIQUE\s+)?KEY\s+["\w\s_]+\([^\)]+\)', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r',\s*CONSTRAINT\s+["\w\s_]+\s+FOREIGN\s+KEY\s*\([^\)]+\)\s*REFERENCES\s+["\w\s_]+\([^\)]+\)', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r',\s*FULLTEXT\s+KEY\s+["\w\s_]+\([^\)]+\)', '', cleaned_sql, flags=re.IGNORECASE)
 
     conn = sqlite3.connect(abs_path)
     cursor = conn.cursor()
     
-    try:
-        cursor.executescript(cleaned_sql)
-        conn.commit()
-    except Exception as e:
-        # Fallback: execute statements line by line, skipping unsupported statements
-        statements = cleaned_sql.split(';')
-        for stmt in statements:
-            stmt_clean = stmt.strip()
-            if stmt_clean:
-                try:
-                    cursor.execute(stmt_clean)
-                except Exception:
-                    pass
-        conn.commit()
-    finally:
-        conn.close()
+    statements = cleaned_sql.split(';')
+    for stmt in statements:
+        stmt_clean = stmt.strip()
+        if stmt_clean:
+            try:
+                cursor.execute(stmt_clean)
+            except Exception:
+                # If CREATE TABLE had uncleaned MySQL syntax, attempt simplified regex creation
+                if stmt_clean.upper().startswith("CREATE TABLE"):
+                    try:
+                        # Extract table name and basic schema
+                        tbl_match = re.search(r'CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?["\']?(\w+)["\']?\s*\((.*)\)', stmt_clean, re.DOTALL | re.IGNORECASE)
+                        if tbl_match:
+                            t_name = tbl_match.group(1)
+                            body = tbl_match.group(2)
+                            # Remove trailing keys/constraints
+                            cols_parts = [p.strip() for p in body.split(',') if not any(k in p.upper() for k in ['KEY ', 'CONSTRAINT ', 'INDEX '])]
+                            simple_ddl = f'CREATE TABLE IF NOT EXISTS "{t_name}" ({", ".join(cols_parts)})'
+                            cursor.execute(simple_ddl)
+                    except Exception:
+                        pass
+                elif stmt_clean.upper().startswith("INSERT INTO"):
+                    try:
+                        cursor.execute(stmt_clean)
+                    except Exception:
+                        pass
+
+    conn.commit()
+    conn.close()
 
     engine = create_engine(f"sqlite:///{abs_path}")
     return engine
+
 
 

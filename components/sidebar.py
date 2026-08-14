@@ -181,14 +181,28 @@ def render_sidebar():
 
         if "sql_tables" in st.session_state and st.session_state["sql_tables"]:
             tables = st.session_state["sql_tables"]
+            engine = st.session_state.get("sql_engine")
             sql_view_options = ["Smart Relational Joined Multi-Table View (All Tables Auto-Joined)"] + tables if len(tables) > 1 else tables
             selected_table_option = st.sidebar.selectbox("Select Active SQL View", sql_view_options)
             
-            if selected_table_option != "Smart Relational Joined Multi-Table View (All Tables Auto-Joined)":
-                engine = st.session_state["sql_engine"]
-                df = load_table_data(engine, selected_table_option)
-                dataset_name = f"SQL Table: {selected_table_option}"
-                st.sidebar.info(f"Active SQL Table: `{selected_table_option}` ({len(df)} rows)")
+            if engine is not None:
+                if selected_table_option != "Smart Relational Joined Multi-Table View (All Tables Auto-Joined)":
+                    df = load_table_data(engine, selected_table_option)
+                    dataset_name = f"SQL Table: {selected_table_option}"
+                    st.sidebar.info(f"Active SQL Table: `{selected_table_option}` ({len(df)} rows)")
+                elif df is None:
+                    try:
+                        from modules.data_processor import merge_multiple_datasets
+                        table_dfs = [load_table_data(engine, t) for t in tables]
+                        if len(table_dfs) > 1:
+                            df = merge_multiple_datasets(table_dfs, mode="join")
+                            dataset_name = f"Smart Relational Joined ({len(tables)} SQL Tables)"
+                        elif len(table_dfs) == 1:
+                            df = table_dfs[0]
+                            dataset_name = f"SQL Table: {tables[0]}"
+                    except Exception as e:
+                        st.sidebar.error(f"Multi-Table Join error: {str(e)}")
+
 
 
     st.sidebar.divider()
