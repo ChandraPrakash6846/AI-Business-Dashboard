@@ -99,7 +99,9 @@ def render_sidebar():
     elif data_source == "Connect SQL Database":
         db_type = st.sidebar.selectbox("DB Engine", ["SQLite", "PostgreSQL", "MySQL"])
         if db_type == "SQLite":
-            db_file = st.sidebar.text_input("Database File Path", value=os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db"))
+            default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
+            db_file = st.sidebar.text_input("Database File Path", value=default_db_path)
+
             if st.sidebar.button("Connect & Fetch Tables"):
                 try:
                     engine = create_db_engine("SQLite", sqlite_path=db_file)
