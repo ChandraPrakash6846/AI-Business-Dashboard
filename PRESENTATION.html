@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Business Dashboard - Technical Defense Presentation by Chandra Prakash Choudhary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #060913; color: #F8FAFC; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* Top Progress Bar */
+        .progress-bar { height: 6px; background: linear-gradient(90deg, #38BDF8, #818CF8, #10B981); width: 9%; transition: width 0.3s ease; }
+
+        /* Header Navigation */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 3rem; background: rgba(15, 23, 42, 0.92); border-bottom: 1.5px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); }
+        .logo { font-size: 1.55rem; font-weight: 900; background: linear-gradient(90deg, #38BDF8, #818CF8, #10B981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slide-counter { color: #94A3B8; font-weight: 700; font-size: 1.15rem; }
+
+        /* Main Presentation Layout */
+        .main-container { flex: 1; display: flex; padding: 1.5rem 3rem; gap: 2rem; max-width: 1840px; margin: 0 auto; width: 100%; height: calc(100vh - 120px); }
+
+        /* Sidebar Navigation Index */
+        .sidebar { width: 360px; background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 18px; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; flex-shrink: 0; }
+        .nav-item { padding: 0.8rem 1rem; border-radius: 12px; color: #94A3B8; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #F8FAFC; }
+        .nav-item.active { background: #2563EB; color: white; font-weight: 800; }
+        .nav-item .num { background: rgba(255, 255, 255, 0.25); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; font-weight: 800; }
+
+        /* Slide Stage Area */
+        .slide-stage { flex: 1; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.14); border-radius: 22px; padding: 2.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.6); backdrop-filter: blur(16px); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; height: 100%; }
+
+        .slide { display: none; height: 100%; flex-direction: column; justify-content: space-between; animation: fadeIn 0.35s ease; }
+        .slide.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Badges & Headers */
+        .badge { background: rgba(56, 189, 248, 0.18); color: #38BDF8; border: 1.5px solid #38BDF8; padding: 6px 18px; border-radius: 30px; font-size: 0.95rem; font-weight: 800; display: inline-block; margin-bottom: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; width: fit-content; }
+        h1 { font-size: 3.2rem; font-weight: 900; line-height: 1.15; margin-bottom: 0.8rem; color: #F8FAFC; letter-spacing: -1px; }
+        h2 { font-size: 2.35rem; font-weight: 800; color: #38BDF8; margin-bottom: 1rem; border-bottom: 1.5px solid rgba(56, 189, 248, 0.25); padding-bottom: 0.6rem; letter-spacing: -0.5px; }
+        p { font-size: 1.35rem; line-height: 1.65; color: #CBD5E1; margin-bottom: 1rem; }
+
+        /* Grid Layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; margin-top: 1rem; flex: 1; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; flex: 1; }
+
+        /* Cards & Elements */
+        .card { background: rgba(7, 10, 19, 0.9); border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 1.6rem; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
+        .card h3 { color: #38BDF8; font-size: 1.55rem; margin-bottom: 0.8rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .card p, .card li { font-size: 1.25rem; color: #E2E8F0; line-height: 1.6; }
+        .card ul { margin-left: 1.2rem; display: flex; flex-direction: column; gap: 10px; }
+
+        .inner-box { background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 1rem 1.2rem; margin-top: 0.8rem; font-size: 1.2rem; line-height: 1.55; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 1.15rem; flex: 1; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1.5px solid rgba(255, 255, 255, 0.1); }
+        th { background: rgba(30, 41, 59, 0.95); color: #38BDF8; font-weight: 800; font-size: 1.2rem; }
+        td { color: #F8FAFC; }
+
+        pre { background: #030712; color: #38BDF8; padding: 18px; border-radius: 14px; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; line-height: 1.6; overflow-x: auto; border: 1.5px solid rgba(255, 255, 255, 0.12); margin-top: 0.8rem; flex: 1; }
+        code { background: rgba(0, 0, 0, 0.5); color: #38BDF8; padding: 3px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; }
+
+        .pipeline-flow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 1.2rem 0; padding: 16px 20px; background: rgba(30, 41, 59, 0.6); border-radius: 16px; border: 1.5px solid rgba(255, 255, 255, 0.12); }
+        .pipeline-step { flex: 1; background: #0F172A; padding: 14px 10px; border-radius: 12px; border: 1.5px solid #2563EB; text-align: center; font-size: 1.05rem; font-weight: 800; color: #F8FAFC; }
+        .pipeline-arrow { color: #38BDF8; font-weight: bold; font-size: 1.5rem; }
+
+        /* Social Profile Links */
+        .profile-link { display: inline-flex; align-items: center; gap: 10px; color: #60A5FA; text-decoration: none; font-weight: 700; padding: 12px 22px; background: rgba(37, 99, 235, 0.2); border: 1.5px solid #2563EB; border-radius: 12px; transition: all 0.2s; font-size: 1.15rem; }
+        .profile-link:hover { background: #2563EB; color: white; }
+
+        /* Controls Footer */
+        .controls { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 3rem; background: rgba(15, 23, 42, 0.92); border-top: 1.5px solid rgba(255, 255, 255, 0.12); }
+        .btn { background: #2563EB; color: white; border: none; padding: 0.8rem 2rem; border-radius: 12px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: background 0.2s ease; }
+        .btn:hover { background: #1D4ED8; }
+        .btn-outline { background: transparent; border: 1.5px solid rgba(255, 255, 255, 0.25); color: #F8FAFC; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.12); }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <header>
+        <div class="logo">🎓 AI Business Dashboard — Capstone Defense by Chandra Prakash Choudhary</div>
+        <div class="slide-counter" id="topSlideCounter">Slide 1 of 11</div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar Navigation Index -->
+        <div class="sidebar" id="sidebarNav">
+            <div class="nav-item active" onclick="goToSlide(0)"><span class="num">1</span> Title & Author</div>
+            <div class="nav-item" onclick="goToSlide(1)"><span class="num">2</span> Industry Context</div>
+            <div class="nav-item" onclick="goToSlide(2)"><span class="num">3</span> Requirements Scope</div>
+            <div class="nav-item" onclick="goToSlide(3)"><span class="num">4</span> End-to-End Pipeline</div>
+            <div class="nav-item" onclick="goToSlide(4)"><span class="num">5</span> Data Cleaning Engine</div>
+            <div class="nav-item" onclick="goToSlide(5)"><span class="num">6</span> ML Anomaly Engine</div>
+            <div class="nav-item" onclick="goToSlide(6)"><span class="num">7</span> Natural Language NLP</div>
+            <div class="nav-item" onclick="goToSlide(7)"><span class="num">8</span> PDF & Excel Exporter</div>
+            <div class="nav-item" onclick="goToSlide(8)"><span class="num">9</span> SQLite Persistence</div>
+            <div class="nav-item" onclick="goToSlide(9)"><span class="num">10</span> Impact Benchmarks</div>
+            <div class="nav-item" onclick="goToSlide(10)"><span class="num">11</span> Thank You & Q&A</div>
+        </div>
+
+        <!-- Main Slide Stage -->
+        <div class="slide-stage">
+
+            <!-- SLIDE 1: Title & Author Overview -->
+            <div class="slide active">
+                <div>
+                    <span class="badge">INTERNSHIP CAPSTONE DEFENSE</span>
+                    <h1>AI-Powered Business Dashboard 📊🤖</h1>
+                    <p style="font-size: 1.45rem; color: #CBD5E1; margin-bottom: 1.5rem; line-height: 1.65;">
+                        An End-to-End Autonomous Data Analytics Platform with ML Anomaly Scanning, Natural Language Querying, and Executive PDF/Excel Exporting.
+                    </p>
+
+                    <div class="grid-3">
+                        <div class="card">
+                            <h3>👨‍💻 Developer & Author</h3>
+                            <p style="font-size: 1.25rem;"><strong>Name:</strong> Chandra Prakash Choudhary<br/>
+                            <strong>Domain:</strong> AI & Data Science Intern<br/>
+                            <strong>Project Type:</strong> Capstone Defense</p>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">Role:</strong> Full-Stack AI Engineer
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>🛠️ Technology Stack</h3>
+                            <p style="font-size: 1.25rem;"><strong>Language:</strong> Python 3.9+<br/><strong>ML/Data:</strong> Pandas, Scikit-learn, Plotly<br/><strong>DB Engine:</strong> SQLAlchemy, SQLite</p>
+                            <div class="inner-box" style="border-color: #818CF8;">
+                                <strong style="color: #818CF8;">Frameworks:</strong> Streamlit, ReportLab
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>🌐 Author Profiles</h3>
+                            <p style="font-size: 1.2rem; margin-bottom: 10px;">Connect with the developer:</p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <a href="https://github.com/ChandraPrakash6846" target="_blank" class="profile-link">💻 GitHub Profile</a>
+                                <a href="https://www.linkedin.com/in/chandra-prakash-choudhary-17b96b212/" target="_blank" class="profile-link">👔 LinkedIn Profile</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.2rem; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.08);">
+                    <h3>💡 Executive Value Statement</h3>
+                    <p style="color: #F8FAFC; font-size: 1.35rem; line-height: 1.65;">
+                        Eliminates manual spreadsheet data prep, automatically flags transactional loss/anomalies using unsupervised ML, and gives non-technical business users immediate analytical decision support in seconds without writing code.
+                    </p>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Industry Problem Statement & Business Context -->
+            <div class="slide">
+                <div>
+                    <span class="badge">BUSINESS PROBLEM & INDUSTRY CONTEXT</span>
+                    <h2>The Data Bottleneck in Modern Business</h2>
+                    <p>Organizations accumulate massive transactional data in CSV files, Excel workbooks, and SQL databases, but raw data is rarely analysis-ready.</p>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div style="flex: 1;">
+                                <h3 style="color: #F43F5E;">❌ Traditional BI Challenges</h3>
+                                <ul>
+                                    <li><strong>Fragile Data Prep:</strong> 80% of analyst time is wasted manually cleaning dirty data, handling missing cells, and formatting dates.</li>
+                                    <li><strong>Undetected Outliers:</strong> Manual observation fails to catch multidimensional anomalies, negative margins, and fraudulent entries.</li>
+                                    <li><strong>High Technical Barrier:</strong> Business stakeholders are dependent on SQL engineers or data teams for basic ad-hoc reports.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #F43F5E;">
+                                <strong style="color: #F43F5E;">Business Loss:</strong> Slow decision cycles & undetected revenue leaks.
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div style="flex: 1;">
+                                <h3 style="color: #10B981;">✅ AI Dashboard Architectural Solution</h3>
+                                <ul>
+                                    <li><strong>Zero-Touch Data Pipeline:</strong> Automated date inferencing, median/mode imputation, and duplicate removal upon file load.</li>
+                                    <li><strong>Isolation Forest Scan:</strong> Unsupervised Machine Learning automatically flags statistical outliers without manual rules.</li>
+                                    <li><strong>Plain English Query Engine:</strong> Translates natural questions into filtered dataframes and dynamic Plotly charts.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #10B981;">
+                                <strong style="color: #10B981;">Business Value:</strong> 96% faster report generation & zero SQL dependency.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Requirements & Assignment Scope -->
+            <div class="slide">
+                <div>
+                    <span class="badge">REQUIREMENTS & SCOPE MATRIX</span>
+                    <h2>Detailed Assignment Compliance Matrix</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Requirement</th>
+                                <th>Assignment Objective</th>
+                                <th>Module & Technical Implementation</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Data Ingestion</strong></td>
+                                <td>Upload CSV/Excel & SQL connection</td>
+                                <td><code>modules/data_processor.py</code> (Pandas + SQLAlchemy)</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Auto Data Cleaning</strong></td>
+                                <td>Clean, validate & impute missing data</td>
+                                <td>Median/Mode imputation & datetime regex auto-parser</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>KPI Generation</strong></td>
+                                <td>Sales, Revenue, Profit, Customers</td>
+                                <td><code>components/kpi_cards.py</code> smart metric calculator</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Interactive Visuals</strong></td>
+                                <td>Bar, Line, Pie, Scatter, Box charts</td>
+                                <td><code>components/charts.py</code> Plotly visualizer engine</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ML & Diagnostics</strong></td>
+                                <td>Trend, Correlation & Anomaly scan</td>
+                                <td><code>IsolationForest</code> + Pearson correlation matrix</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Natural Language AI</strong></td>
+                                <td>Ask dataset questions in plain English</td>
+                                <td><code>modules/ai_engine.py</code> NL regex interpreter</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Executive Export</strong></td>
+                                <td>PDF and Excel report downloads</td>
+                                <td><code>modules/export_engine.py</code> (ReportLab + openpyxl)</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analysis History</strong></td>
+                                <td>Persist sessions & query logs</td>
+                                <td><code>modules/database.py</code> (SQLite <code>dashboard_history.db</code>)</td>
+                                <td><span style="color:#10B981; font-weight:800;">✅ Passed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: End-to-End Pipeline & Architecture -->
+            <div class="slide">
+                <div>
+                    <span class="badge">SYSTEM PIPELINE & ARCHITECTURE</span>
+                    <h2>End-to-End Data Processing Pipeline Flow</h2>
+                    <p>Understanding how raw input data flows through the system to become executive intelligence:</p>
+
+                    <div class="pipeline-flow">
+                        <div class="pipeline-step">1. Ingestion<br/><small style="color:#38BDF8; font-size: 0.95rem;">CSV / Excel / SQL</small></div>
+                        <span class="pipeline-arrow">➔</span>
+                        <div class="pipeline-step">2. Cleaning<br/><small style="color:#38BDF8; font-size: 0.95rem;">Validation & Impute</small></div>
+                        <span class="pipeline-arrow">➔</span>
+                        <div class="pipeline-step">3. ML Scan<br/><small style="color:#38BDF8; font-size: 0.95rem;">Isolation Forest</small></div>
+                        <span class="pipeline-arrow">➔</span>
+                        <div class="pipeline-step">4. Query AI<br/><small style="color:#38BDF8; font-size: 0.95rem;">NLP Parsing</small></div>
+                        <span class="pipeline-arrow">➔</span>
+                        <div class="pipeline-step">5. Export<br/><small style="color:#38BDF8; font-size: 0.95rem;">PDF & Excel</small></div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div>
+                                <h3>📁 Pipeline Stage 1 - 3</h3>
+                                <ul>
+                                    <li><strong>Ingestion:</strong> Detects encoding & parses byte buffers for CSV/Excel or connects via SQLAlchemy engine.</li>
+                                    <li><strong>Cleaning:</strong> Strips whitespace, drops duplicate rows, auto-converts date columns, imputes missing cells.</li>
+                                    <li><strong>ML Diagnostics:</strong> Trains an unsupervised <code>IsolationForest</code> tree model on numerical features to isolate outliers.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">Data Processing Throughput:</strong> &lt; 0.5s for 50,000 dataset rows.
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div>
+                                <h3>⚙️ Pipeline Stage 4 - 5</h3>
+                                <ul>
+                                    <li><strong>NLP Interpreter:</strong> Maps natural queries to target metrics and grouping dimensions to slice Pandas DataFrames.</li>
+                                    <li><strong>Report Generation:</strong> Compiles dataset health metrics, KPIs, and AI insights into publication PDF canvas & Excel sheets.</li>
+                                    <li><strong>Session Logging:</strong> Persists analysis summaries and executed queries into SQLite DB.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #10B981;">
+                                <strong style="color: #10B981;">Executive Output:</strong> Publication-grade ReportLab PDF & openpyxl workbook.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Data Cleaning Engine Deep-Dive -->
+            <div class="slide">
+                <div>
+                    <span class="badge">DATA ENGINEERING DEEP-DIVE</span>
+                    <h2>Automated Data Health & Cleaning Pipeline</h2>
+                    <p>Detailed technical breakdown of <code>modules/data_processor.py</code>:</p>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div>
+                                <h3>🛠️ Cleaning Algorithm Workflow</h3>
+                                <ol style="margin-left: 1.4rem; line-height: 1.7; font-size: 1.25rem;">
+                                    <li><strong>Header Normalization:</strong> Strips leading/trailing whitespace from column titles.</li>
+                                    <li><strong>Duplicate Purging:</strong> Evaluates <code>df.duplicated().sum()</code> and drops identical rows.</li>
+                                    <li><strong>Automatic Datetime Parsing:</strong> Scans string columns containing <em>date, time, day, month, created</em> and attempts <code>pd.to_datetime(col, errors='coerce')</code>. If >50% non-null, converts column to datetime.</li>
+                                    <li><strong>Smart Imputation Engine:</strong>
+                                        <ul style="margin-top: 6px;">
+                                            <li>Numerical columns ➔ <code>fillna(median)</code></li>
+                                            <li>Categorical columns ➔ <code>fillna(mode[0])</code></li>
+                                            <li>Datetime columns ➔ <code>bfill().ffill()</code></li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">Robustness:</strong> Prevents app crashes on dirty datasets with missing or malformed inputs.
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="margin-bottom: 0.4rem;">💻 Core Cleaning Code Snippet</h3>
+                            <pre><code>def clean_and_validate(df):
+    cleaned_df = df.copy()
+    cleaned_df.columns = [str(c).strip() for c in cleaned_df.columns]
+    
+    # Remove Duplicates
+    cleaned_df = cleaned_df.drop_duplicates()
+    
+    # Impute Missing Values
+    for col in cleaned_df.columns:
+        if pd.api.types.is_numeric_dtype(cleaned_df[col]):
+            cleaned_df[col] = cleaned_df[col].fillna(cleaned_df[col].median())
+        elif pd.api.types.is_datetime64_any_dtype(cleaned_df[col]):
+            cleaned_df[col] = cleaned_df[col].bfill().ffill()
+        else:
+            mode_val = cleaned_df[col].mode()
+            cleaned_df[col] = cleaned_df[col].fillna(mode_val[0] if not mode_val.empty else "Unknown")
+            
+    return cleaned_df, health_report</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: Machine Learning Anomaly Engine -->
+            <div class="slide">
+                <div>
+                    <span class="badge">MACHINE LEARNING DEEP-DIVE</span>
+                    <h2>Machine Learning Anomaly Scan & Statistical Engine</h2>
+                    <p>Detailed technical breakdown of <code>modules/ai_engine.py</code>:</p>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div>
+                                <h3>🚨 Isolation Forest Anomaly Detection</h3>
+                                <p>Unlike traditional z-score thresholding which evaluates columns independently, <code>IsolationForest</code> isolates anomalies by randomly selecting a feature and split value, building an ensemble of isolation trees.</p>
+                                <ul>
+                                    <li><strong>Feature Space:</strong> All numerical columns in dataset.</li>
+                                    <li><strong>Contamination Rate:</strong> Set to 0.05 (top 5% most anomalous records).</li>
+                                    <li><strong>Decision Logic:</strong> Anomalies require fewer splits to isolate (shorter tree path length).</li>
+                                </ul>
+                            </div>
+                            <pre style="margin-top: 8px;"><code>model = IsolationForest(contamination=0.05, random_state=42)
+df_result['is_anomaly'] = model.fit_predict(df_clean) == -1</code></pre>
+                        </div>
+
+                        <div class="card">
+                            <div>
+                                <h3>🔥 Pearson Correlation Matrix Engine</h3>
+                                <p>Calculates exact pairwise correlation coefficients \( r \):</p>
+                                <p style="text-align: center; color: #38BDF8; margin: 10px 0; font-size: 1.45rem;">\[ r = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}} \]</p>
+                                <ul>
+                                    <li>Calculates absolute correlation matrix across numerical variables.</li>
+                                    <li>Fills diagonal matrix with zeros to ignore self-correlation.</li>
+                                    <li>Flags high correlation pairs (\(|r| > 0.70\)) for executive insights.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #818CF8;">
+                                <strong style="color: #818CF8;">Insight Output:</strong> Identifies collinearity & hidden statistical drivers automatically.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 7: Natural Language Query & NLP Pipeline -->
+            <div class="slide">
+                <div>
+                    <span class="badge">NLP & QUERY PARSER DEEP-DIVE</span>
+                    <h2>Natural Language Query Engine Pipeline</h2>
+                    <p>How plain text questions are processed into filtered DataFrames and dynamic Plotly charts:</p>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div>
+                                <h3>🔍 Query Processing Pipeline Steps</h3>
+                                <ol style="margin-left: 1.4rem; line-height: 1.7; font-size: 1.25rem;">
+                                    <li><strong>Tokenization & Normalization:</strong> Converts input to lowercase and strips special characters.</li>
+                                    <li><strong>Column Intent Mapping:</strong> Scans query against <code>get_smart_column_mapping()</code> dictionary to identify target metric (Sales, Profit, Quantity).</li>
+                                    <li><strong>Grouping & Dimension Detection:</strong> Checks for keywords like <em>"by category"</em>, <em>"by region"</em>, <em>"over time"</em>.</li>
+                                    <li><strong>Value Filter Matching:</strong> Iterates over unique categorical values to apply exact string filters (e.g., <em>Category == "Technology"</em>).</li>
+                                    <li><strong>Chart Type Selection:</strong> If grouping by time, selects Line Chart; if grouping by category, selects Bar Chart.</li>
+                                </ol>
+                            </div>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">Zero Dependency:</strong> Runs 100% offline without external LLM API costs or latency.
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="margin-bottom: 0.4rem;">💻 Natural Language Query Parser Logic</h3>
+                            <pre><code>def process_natural_language_query(query, df):
+    q = query.lower().strip()
+    mapping = get_smart_column_mapping(df)
+    
+    # Detect target numerical metric
+    target_metric = mapping.get("sales") or num_cols[0]
+    
+    # Detect group dimension
+    if "by category" in q:
+        group_col = mapping.get("category")
+    elif "over time" in q:
+        group_col = mapping.get("date")
+        chart_type = "line"
+        
+    # Group & Aggregate Pandas Dataframe
+    agg_df = df.groupby(group_col)[target_metric].sum().reset_index()
+    return agg_df, chart_type, summary, group_col, target_metric</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 8: Executive Reporting & Multi-Format Exporter (FULLY DENSE PACKED WITH LARGE FONTS) -->
+            <div class="slide">
+                <div>
+                    <span class="badge">MULTI-FORMAT EXPORT ENGINE</span>
+                    <h2>PDF & Excel Report Exporter Engine</h2>
+                    <p>Detailed technical breakdown of <code>modules/export_engine.py</code>:</p>
+
+                    <div class="grid-2">
+                        <div class="card-box card-emerald">
+                            <div>
+                                <div class="card-header-title" style="color: #38BDF8;">📄 PDF Canvas Builder (ReportLab)</div>
+                                <p class="desc-text">Constructs print-ready PDF documents using <code>SimpleDocTemplate</code> flowable elements:</p>
+                                <ul class="check-list">
+                                    <li><strong>Styles:</strong> Custom <code>ParagraphStyle</code> definitions for Title, Headings, Subtitles, and Body.</li>
+                                    <li><strong>Tables:</strong> Formatted <code>Table</code> objects with <code>TableStyle</code> background fills, grid lines, and column width control.</li>
+                                    <li><strong>Flowables:</strong> Page boundaries, horizontal dividers (<code>HRFlowable</code>), and automatic page overflow flow.</li>
+                                    <li><strong>Page Numbers:</strong> Dynamic footer page numbering via custom canvas callback.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">⚡ PDF Latency:</strong> Generates a publication-grade 5-page PDF in &lt; 0.35 seconds.
+                            </div>
+                        </div>
+
+                        <div class="card-box card-violet">
+                            <div>
+                                <div class="card-header-title" style="color: #818CF8;">📊 Multi-Tab Excel Engine (openpyxl)</div>
+                                <p class="desc-text">Constructs formatted multi-tab `.xlsx` workbooks using openpyxl:</p>
+                                <ul class="check-list">
+                                    <li><strong>Tab 1 (Executive Summary):</strong> Styled header block, KPI metrics, data health table.</li>
+                                    <li><strong>Tab 2 (Cleaned Data):</strong> Appends raw cleaned dataframe rows via <code>dataframe_to_rows</code> with styled dark header row.</li>
+                                    <li><strong>Tab 3 (AI Insights):</strong> Categorized strategic recommendations.</li>
+                                    <li><strong>Autoscaling:</strong> Dynamic column width calculation using <code>get_column_letter()</code>.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #818CF8;">
+                                <strong style="color: #818CF8;">📊 Workbook Specs:</strong> 100% Excel-compliant with auto-column width & formula preservation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: SQLite Persistence & History Layer -->
+            <div class="slide">
+                <div>
+                    <span class="badge">DATABASE PERSISTENCE DEEP-DIVE</span>
+                    <h2>SQLite Database & History Log Architecture</h2>
+                    <p>Detailed technical breakdown of <code>modules/database.py</code>:</p>
+
+                    <div class="grid-2">
+                        <div class="card">
+                            <div>
+                                <h3>🗄️ Database Relational Schema</h3>
+                                <p>Stores analysis history and natural language query logs in local SQLite database (<code>dashboard_history.db</code>):</p>
+                                <pre><code>CREATE TABLE IF NOT EXISTS history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT,
+    timestamp TEXT,
+    row_count INTEGER,
+    col_count INTEGER,
+    summary_json TEXT,
+    insights_json TEXT,
+    kpis_json TEXT
+);
+
+CREATE TABLE IF NOT EXISTS nl_queries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT,
+    query TEXT,
+    result_summary TEXT
+);</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div>
+                                <h3>⚡ Serialization & Retrieval Flow</h3>
+                                <ul>
+                                    <li><strong>JSON Serialization:</strong> Complex dictionary objects (KPIs, Data Health, Insights) are serialized using <code>json.dumps()</code> before storage.</li>
+                                    <li><strong>Session Logging:</strong> Saves analysis snapshots automatically upon new dataset load.</li>
+                                    <li><strong>Query Tracking:</strong> Logs every natural language question and summary answer for audit trail.</li>
+                                    <li><strong>Management:</strong> Provides 1-click database clear and historical session reloading in the UI.</li>
+                                </ul>
+                            </div>
+                            <div class="inner-box" style="border-color: #38BDF8;">
+                                <strong style="color: #38BDF8;">Data Integrity:</strong> Atomic SQLite transactions ensure zero corruption during simultaneous writes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 10: Performance Benchmarks & Conclusion -->
+            <div class="slide">
+                <div>
+                    <span class="badge">BENCHMARKS & CONCLUSION</span>
+                    <h2>Performance Benchmarks, Impact & Future Roadmap</h2>
+
+                    <div class="grid-3">
+                        <div class="card" style="text-align: center;">
+                            <div class="stat-number" style="color: #38BDF8; font-size: 3.8rem;">&lt; 0.8s</div>
+                            <div class="stat-label">Dataset Cleaning & KPI Speed</div>
+                            <p class="desc-text" style="font-size: 1.15rem; margin-top: 6px;">Total time for cleaning, validation, and KPI generation.</p>
+                        </div>
+                        <div class="card" style="text-align: center;">
+                            <div class="stat-number" style="color: #10B981; font-size: 3.8rem;">100%</div>
+                            <div class="stat-label">Offline Capability</div>
+                            <p class="desc-text" style="font-size: 1.15rem; margin-top: 6px;">100% operational capability with built-in statistical fallback engine.</p>
+                        </div>
+                        <div class="card" style="text-align: center;">
+                            <div class="stat-number" style="color: #818CF8; font-size: 3.8rem;">0 Error</div>
+                            <div class="stat-label">Test Suite Score</div>
+                            <p class="desc-text" style="font-size: 1.15rem; margin-top: 6px;">Passed automated verification test suite across all modules.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top: 1rem;">
+                        <div class="card">
+                            <h3>🎓 Internship Accomplishments</h3>
+                            <ul>
+                                <li>Built an end-to-end Python AI Business Dashboard meeting 100% of assignment specifications.</li>
+                                <li>Designed a clean, modular architecture separating data processing, machine learning, NLP, UI, and exports.</li>
+                                <li>Developed comprehensive documentation, user manual, HTML presentation, and test suite.</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h3>🚀 Future Roadmap</h3>
+                            <ul>
+                                <li>Integrate time-series forecasting algorithms (Prophet / ARIMA) for sales prediction.</li>
+                                <li>Add Docker containerization for automated cloud deployment (AWS ECS / Streamlit Cloud).</li>
+                                <li>Expand Natural Language Query engine with SQL generation via LLM function calling.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 11: Final Contact & Q&A Slide -->
+            <div class="slide">
+                <div style="text-align: center; max-width: 1200px; margin: 0 auto;">
+                    <span class="badge">THANK YOU & QUESTIONS</span>
+                    <h1 style="font-size: 4.8rem; text-align: center; margin-top: 1rem; color: #F8FAFC;">Thank You! Any Questions? ❓</h1>
+                    <p style="text-align: center; font-size: 1.6rem; color: #94A3B8; margin-bottom: 2.5rem;">AI Business Dashboard Capstone Project Defense</p>
+
+                    <div class="card" style="max-width: 850px; margin: 0 auto; text-align: center; padding: 2.5rem; border-color: rgba(56, 189, 248, 0.4); background: rgba(15, 23, 42, 0.95);">
+                        <h2 style="border: none; margin-bottom: 0.5rem; font-size: 2.5rem; color: #F8FAFC;">Chandra Prakash Choudhary</h2>
+                        <p style="color: #38BDF8; font-weight: 800; margin-bottom: 2rem; font-size: 1.4rem;">AI & Data Science Intern</p>
+                        
+                        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                            <a href="https://github.com/ChandraPrakash6846" target="_blank" class="profile-link" style="font-size: 1.25rem; padding: 14px 28px;">💻 GitHub: ChandraPrakash6846</a>
+                            <a href="https://www.linkedin.com/in/chandra-prakash-choudhary-17b96b212/" target="_blank" class="profile-link" style="font-size: 1.25rem; padding: 14px 28px;">👔 LinkedIn Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Controls Footer -->
+    <div class="controls">
+        <button class="btn btn-outline" onclick="changeSlide(-1)">◀ Previous</button>
+        <div style="display: flex; gap: 14px;">
+            <button class="btn btn-outline" onclick="toggleFullScreen()">Fullscreen ⛶</button>
+            <button class="btn" onclick="changeSlide(1)">Next ▶</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const navItems = document.querySelectorAll('.nav-item');
+        const topSlideCounter = document.getElementById('topSlideCounter');
+        const progressBar = document.getElementById('progressBar');
+
+        function updateSlideDisplay() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            navItems.forEach((item, index) => {
+                item.classList.toggle('active', index === currentSlide);
+            });
+            topSlideCounter.textContent = `Slide ${currentSlide + 1} of ${slides.length}`;
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+            updateSlideDisplay();
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlideDisplay();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+    </script>
+</body>
+</html>

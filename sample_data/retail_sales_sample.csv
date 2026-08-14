@@ -1,0 +1,27 @@
+Date,Order_ID,Customer_ID,Customer_Name,Category,Sub_Category,Region,Sales,Quantity,Discount,Profit,Payment_Method,Satisfaction_Score
+2024-01-05,ORD-1001,CUST-501,Alice Smith,Technology,Laptops,North,1200.00,1,0.05,240.00,Credit Card,5
+2024-01-08,ORD-1002,CUST-502,Bob Johnson,Furniture,Chairs,East,450.50,2,0.10,45.00,PayPal,4
+2024-01-12,ORD-1003,CUST-503,Carol White,Office Supplies,Paper,South,85.00,5,0.00,25.50,Credit Card,5
+2024-01-15,ORD-1004,CUST-504,David Brown,Technology,Smartphones,West,950.00,1,0.00,190.00,Debit Card,4
+2024-01-18,ORD-1005,CUST-505,Eva Green,Furniture,Tables,North,750.00,1,0.15,-50.00,Credit Card,2
+2024-01-22,ORD-1006,CUST-506,Frank Miller,Office Supplies,Binders,East,120.00,4,0.05,36.00,PayPal,5
+2024-01-25,ORD-1007,CUST-507,Grace Wilson,Technology,Accessories,South,210.00,3,0.10,63.00,Credit Card,4
+2024-02-02,ORD-1008,CUST-508,Henry Taylor,Furniture,Bookcases,West,620.00,2,0.20,31.00,Debit Card,3
+2024-02-05,ORD-1009,CUST-509,Irene Anderson,Office Supplies,Storage,North,340.00,2,0.00,68.00,Credit Card,5
+2024-02-10,ORD-1010,CUST-510,Jack Thomas,Technology,Laptops,East,2800.00,2,0.05,650.00,Credit Card,5
+2024-02-14,ORD-1011,CUST-511,Karen Jackson,Furniture,Chairs,South,310.00,1,0.00,62.00,PayPal,4
+2024-02-18,ORD-1012,CUST-512,Liam Harris,Office Supplies,Paper,West,95.00,6,0.10,19.00,Debit Card,4
+2024-02-22,ORD-1013,CUST-513,Mia Martin,Technology,Smartphones,North,1100.00,1,0.00,220.00,Credit Card,5
+2024-02-25,ORD-1014,CUST-514,Noah Clark,Furniture,Furnishings,East,180.00,3,0.05,45.00,PayPal,3
+2024-03-01,ORD-1015,CUST-515,Olivia Rodriguez,Office Supplies,Art,South,65.00,2,0.00,19.50,Credit Card,4
+2024-03-05,ORD-1016,CUST-516,Paul Lewis,Technology,Accessories,West,150.00,2,0.10,30.00,Debit Card,4
+2024-03-10,ORD-1017,CUST-517,Quinn Lee,Furniture,Chairs,North,520.00,2,0.00,104.00,Credit Card,5
+2024-03-15,ORD-1018,CUST-518,Rachel Walker,Office Supplies,Appliances,East,420.00,1,0.15,84.00,PayPal,4
+2024-03-19,ORD-1019,CUST-519,Sam Hall,Technology,Smartphones,South,1350.00,1,0.05,270.00,Credit Card,5
+2024-03-22,ORD-1020,CUST-520,Tina Allen,Furniture,Tables,West,890.00,1,0.25,-120.00,Debit Card,1
+2024-03-28,ORD-1021,CUST-521,Ulysses Young,Technology,Laptops,North,15000.00,10,0.50,-2500.00,Credit Card,1
+2024-04-02,ORD-1022,CUST-522,Victoria King,Office Supplies,Paper,East,110.00,4,0.00,33.00,PayPal,4
+2024-04-06,ORD-1023,CUST-523,Will Wright,Technology,Accessories,South,290.00,3,0.10,72.50,Credit Card,5
+2024-04-12,ORD-1024,CUST-524,Xena Scott,Furniture,Bookcases,West,780.00,2,0.10,156.00,Debit Card,4
+2024-04-18,ORD-1025,CUST-525,Yusuf Adams,Office Supplies,Binders,North,140.00,5,0.00,42.00,Credit Card,5
+2024-04-25,ORD-1026,CUST-526,Zoe Baker,Technology,Laptops,East,1450.00,1,0.00,290.00,PayPal,5
