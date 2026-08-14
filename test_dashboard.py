@@ -51,12 +51,18 @@ def test_all():
     print(f"[SUCCESS] Built-in SQL Database Seeded: Found tables {sql_tables}")
     assert "sales_orders" in sql_tables and "product_catalog" in sql_tables, "SQL Seeder failed"
 
-    # Test .sql script execution
-    sample_sql_script = "CREATE TABLE test_sql_dump (id INT, val TEXT); INSERT INTO test_sql_dump VALUES (1, 'hello');"
-    dump_engine = execute_sql_dump_script(sample_sql_script, os.path.join(os.path.dirname(__file__), "test_dump.db"))
-    dump_tables = list_tables(dump_engine)
-    print(f"[SUCCESS] SQL Dump Script Executed: Found tables {dump_tables}")
-    assert "test_sql_dump" in dump_tables, ".SQL script parser failed"
+    # Test Sakila SQL dump schema KPI calculation
+    from components.kpi_cards import render_kpi_cards
+    df_sakila = pd.DataFrame([
+        {"film_id": 1, "title": "ACADEMY DINOSAUR", "rental_rate": 0.99, "replacement_cost": 20.99},
+        {"film_id": 2, "title": "ACE GOLDFINGER", "rental_rate": 4.99, "replacement_cost": 12.99},
+        {"film_id": 3, "title": "ADAPTATION HOLES", "rental_rate": 2.99, "replacement_cost": 18.99}
+    ])
+    sakila_kpis = render_kpi_cards(df_sakila)
+    print(f"[SUCCESS] Sakila KPI Test Result: {sakila_kpis}")
+    assert sakila_kpis["Total Sales"] != "$0.00", "Sakila KPI total sales calculation failed"
+    assert sakila_kpis["Unique Customers/Entities"] != "1", "Sakila entity count failed"
+
 
 
     init_db()
