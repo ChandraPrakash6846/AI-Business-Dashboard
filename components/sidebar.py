@@ -99,24 +99,11 @@ def render_sidebar():
     elif data_source == "Connect SQL Database":
         sql_mode = st.sidebar.radio(
             "SQL Connection Mode",
-            ["Built-in SQL Database (Instant 0-Setup)", "Local SQLite Database or .sql Script", "Remote MySQL / PostgreSQL Server"],
+            ["Local SQLite Database or .sql Script", "Remote MySQL / PostgreSQL Server"],
             index=0
         )
 
-
-        if sql_mode == "Built-in SQL Database (Instant 0-Setup)":
-            from modules.sql_connector import seed_sample_sql_database
-            default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
-            try:
-                engine = seed_sample_sql_database(default_db_path)
-                tables = list_tables(engine)
-                st.session_state["sql_tables"] = tables
-                st.session_state["sql_engine"] = engine
-                st.sidebar.success(f"Connected to Built-in SQL Database! Found {len(tables)} tables.")
-            except Exception as e:
-                st.sidebar.error(f"SQL Connection error: {str(e)}")
-
-        elif sql_mode == "Local SQLite Database or .sql Script":
+        if sql_mode == "Local SQLite Database or .sql Script":
             uploaded_db = st.sidebar.file_uploader("Upload .db, .sqlite or .sql Script File", type=["db", "sqlite", "sqlite3", "sql"])
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
             db_file_path = st.sidebar.text_input("Or Enter Database / .sql File Path", value=default_db_path)
@@ -150,6 +137,7 @@ def render_sidebar():
                     st.sidebar.success(f"Successfully loaded! Found {len(tables)} tables.")
                 except Exception as e:
                     st.sidebar.error(f"SQL Loading failed: {str(e)}")
+
 
 
         elif sql_mode == "Remote MySQL / PostgreSQL Server":
