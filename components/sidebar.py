@@ -97,21 +97,48 @@ def render_sidebar():
             st.sidebar.warning("Sample dataset file not found.")
 
     elif data_source == "Connect SQL Database":
-        db_type = st.sidebar.selectbox("DB Engine", ["SQLite", "MySQL", "PostgreSQL"])
-        if db_type == "SQLite":
+        sql_mode = st.sidebar.radio(
+            "SQL Connection Mode",
+            ["Built-in SQL Database (Instant 0-Setup)", "Local SQLite File (.db)", "Remote MySQL / PostgreSQL Server"],
+            index=0
+        )
+
+        if sql_mode == "Built-in SQL Database (Instant 0-Setup)":
+            from modules.sql_connector import seed_sample_sql_database
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
-            db_file = st.sidebar.text_input("Database File Path (.db)", value=default_db_path)
-            if st.sidebar.button("Connect & Fetch Tables", type="primary"):
+            try:
+                engine = seed_sample_sql_database(default_db_path)
+                tables = list_tables(engine)
+                st.session_state["sql_tables"] = tables
+                st.session_state["sql_engine"] = engine
+                st.sidebar.success(f"Connected to Built-in SQL Database! Found {len(tables)} tables.")
+            except Exception as e:
+                st.sidebar.error(f"SQL Connection error: {str(e)}")
+
+        elif sql_mode == "Local SQLite File (.db)":
+            uploaded_db = st.sidebar.file_uploader("Upload .db or .sqlite File", type=["db", "sqlite", "sqlite3"])
+            default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
+            db_file_path = st.sidebar.text_input("Or Enter Database File Path", value=default_db_path)
+            
+            if st.sidebar.button("Connect to SQLite", type="primary"):
                 try:
-                    engine = create_db_engine("SQLite", sqlite_path=db_file)
+                    if uploaded_db is not None:
+                        # Save uploaded db buffer to temp location
+                        temp_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", f"uploaded_{uploaded_db.name}")).replace('\\', '/')
+                        with open(temp_db_path, "wb") as f_out:
+                            f_out.write(uploaded_db.getbuffer())
+                        db_file_path = temp_db_path
+
+                    engine = create_db_engine("SQLite", sqlite_path=db_file_path)
                     tables = list_tables(engine)
                     st.session_state["sql_tables"] = tables
                     st.session_state["sql_engine"] = engine
                     st.sidebar.success(f"Connected! Found {len(tables)} tables.")
                 except Exception as e:
-                    st.sidebar.error(f"Connection failed: {str(e)}")
+                    st.sidebar.error(f"SQLite Connection failed: {str(e)}")
 
-        elif db_type in ["MySQL", "PostgreSQL"]:
+        elif sql_mode == "Remote MySQL / PostgreSQL Server":
+            db_type = st.sidebar.selectbox("DB Engine", ["MySQL", "PostgreSQL"])
             default_port = 3306 if db_type == "MySQL" else 5432
             host = st.sidebar.text_input("Host", value="localhost")
             port = st.sidebar.number_input("Port", value=default_port, step=1)
@@ -129,14 +156,14 @@ def render_sidebar():
                 except Exception as e:
                     st.sidebar.error(f"{db_type} Connection error: {str(e)}")
 
-
         if "sql_tables" in st.session_state and st.session_state["sql_tables"]:
-            selected_table = st.sidebar.selectbox("Select Table", st.session_state["sql_tables"])
-            if st.sidebar.button("Load Table Data"):
+            selected_table = st.sidebar.selectbox("Select SQL Table to Load", st.session_state["sql_tables"])
+            if st.sidebar.button("📊 Load & Analyze SQL Table", type="secondary") or df is None:
                 engine = st.session_state["sql_engine"]
                 df = load_table_data(engine, selected_table)
                 dataset_name = f"SQL Table: {selected_table}"
-                st.sidebar.success(f"Loaded {selected_table} ({len(df)} rows)")
+                st.sidebar.info(f"Active SQL Table: `{selected_table}` ({len(df)} rows)")
+
 
     st.sidebar.divider()
     st.sidebar.subheader("⚙️ Dashboard Settings")
