@@ -23,6 +23,13 @@ def test_all():
     print(f"[SUCCESS] Smart Column Mapping: {mapping}")
     assert mapping['sales'] is not None, "Sales column mapping failed"
 
+    # Multi-File Merge Test
+    from modules.data_processor import merge_multiple_datasets
+    df_merged = merge_multiple_datasets([csv_path, csv_path], mode="concat")
+    print(f"[SUCCESS] Multi-File Concat Merge: {len(df_merged)} rows created from 2 files.")
+    assert len(df_merged) == len(df_raw) * 2, "Multi-file concat failed"
+
+
     # 2. Test Statistical Insights & Anomalies
     insights = generate_statistical_insights(df_clean)
     print(f"[SUCCESS] AI Insights Generated: {len(insights)} items.")

@@ -134,3 +134,41 @@ def get_smart_column_mapping(df):
         "customer": match(['customer', 'client', 'user', 'buyer', 'customer_name'])
     }
     return mapping
+
+def merge_multiple_datasets(file_list, mode="concat", join_key=None):
+    """
+    Merges or concatenates multiple uploaded files (CSV/Excel) into a unified DataFrame.
+    - mode="concat": Vertically stacks files (e.g. Sales_Jan.csv, Sales_Feb.csv)
+    - mode="join": Horizontally joins files on common key column (e.g. Order_ID)
+    """
+    if not file_list:
+        raise ValueError("No files provided for merging.")
+
+    dfs = []
+    for f in file_list:
+        df_temp = load_dataset(f)
+        dfs.append(df_temp)
+
+    if len(dfs) == 1:
+        return dfs[0]
+
+    if mode == "concat":
+        merged_df = pd.concat(dfs, ignore_index=True)
+    elif mode == "join":
+        if not join_key:
+            # Auto-detect common column if not provided
+            common_cols = list(set.intersection(*[set(d.columns) for d in dfs]))
+            join_key = common_cols[0] if common_cols else None
+            
+        if not join_key:
+            raise ValueError("No common key column found across uploaded files for joining.")
+
+        merged_df = dfs[0]
+        for next_df in dfs[1:]:
+            # Drop duplicated non-key columns before merging to prevent collision
+            overlapping = [c for c in next_df.columns if c in merged_df.columns and c != join_key]
+            next_df_clean = next_df.drop(columns=overlapping)
+            merged_df = pd.merge(merged_df, next_df_clean, on=join_key, how="outer")
+
+    return merged_df
+

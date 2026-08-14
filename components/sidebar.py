@@ -27,8 +27,8 @@ def render_sidebar():
 
     data_source = st.sidebar.radio(
         "📁 Select Data Source",
-        ["Upload File (CSV/Excel)", "Use Built-in Sample Dataset", "Connect SQL Database"],
-        index=1
+        ["Upload File (CSV/Excel)", "Upload Multiple Files (Concatenate/Merge)", "Use Built-in Sample Dataset", "Connect SQL Database"],
+        index=2
     )
 
     df = None
@@ -48,7 +48,41 @@ def render_sidebar():
             except Exception as e:
                 st.sidebar.error(f"Error loading file: {str(e)}")
 
+    elif data_source == "Upload Multiple Files (Concatenate/Merge)":
+        uploaded_files = st.sidebar.file_uploader(
+            "Upload Multiple Datasets",
+            type=["csv", "xlsx", "xls"],
+            accept_multiple_files=True,
+            help="Upload multiple CSV/Excel files to combine them into one dataset"
+        )
+        if uploaded_files and len(uploaded_files) > 0:
+            merge_mode = st.sidebar.radio(
+                "Multi-File Combine Strategy",
+                ["Concatenate / Stack Rows", "Join / Merge on Common Key Column"],
+                index=0
+            )
+            mode_key = "concat" if merge_mode == "Concatenate / Stack Rows" else "join"
+            
+            join_key = None
+            if mode_key == "join":
+                join_key = st.sidebar.text_input("Common Key Column (e.g. Order_ID, Customer_ID)", placeholder="Leave blank to auto-detect")
+                join_key = join_key.strip() if join_key else None
+
+            if st.sidebar.button("🔗 Combine & Process Files", type="primary"):
+                try:
+                    from modules.data_processor import merge_multiple_datasets
+                    df = merge_multiple_datasets(uploaded_files, mode=mode_key, join_key=join_key)
+                    dataset_name = f"Merged ({len(uploaded_files)} files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
+                    st.sidebar.success(f"Successfully combined {len(uploaded_files)} files into {len(df)} rows!")
+                    st.session_state["multi_merged_df"] = (df, dataset_name)
+                except Exception as e:
+                    st.sidebar.error(f"Merge error: {str(e)}")
+
+            if "multi_merged_df" in st.session_state and df is None:
+                df, dataset_name = st.session_state["multi_merged_df"]
+
     elif data_source == "Use Built-in Sample Dataset":
+
         if os.path.exists(SAMPLE_CSV):
             df = pd.read_csv(SAMPLE_CSV)
             dataset_name = "retail_sales_sample.csv"

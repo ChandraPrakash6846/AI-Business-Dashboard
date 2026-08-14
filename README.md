@@ -16,7 +16,7 @@ This project was built to satisfy all requirements specified in the Internship A
 
 | # | Requirement | Status | Project Implementation |
 | :--- | :--- | :---: | :--- |
-| 1 | **Upload CSV and Excel datasets** | ✅ **Passed** | Built-in file uploader supporting `.csv`, `.xlsx`, and `.xls` formats. |
+| 1 | **Upload CSV/Excel & Multi-File Datasets** | ✅ **Passed** | Built-in file uploader supporting single & multi-file concatenation/merging. |
 | 2 | **Connect to a SQL database** *(Optional Bonus)* | ✅ **Passed** | `SQLAlchemy` integration supporting SQLite, PostgreSQL, and MySQL. |
 | 3 | **Automatically clean and validate data** | ✅ **Passed** | Auto-detects dates, imputes missing values (median/mode), and trims duplicates. |
 | 4 | **Generate KPI cards** | ✅ **Passed** | Dynamic metric cards: Sales, Net Profit, Profit Margin %, AOV, Orders, Customers. |
@@ -26,6 +26,7 @@ This project was built to satisfy all requirements specified in the Internship A
 | 8 | **Support natural language queries** | ✅ **Passed** | Plain English query interpreter with text filtering and auto-chart rendering. |
 | 9 | **Export reports in PDF or Excel format** | ✅ **Passed** | 1-click PDF Report generator (`ReportLab`) & formatted Excel exporter (`openpyxl`). |
 | 10 | **Maintain analysis history** | ✅ **Passed** | SQLite database (`dashboard_history.db`) tracking dataset sessions and query logs. |
+
 
 ---
 
