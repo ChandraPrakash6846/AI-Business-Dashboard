@@ -27,20 +27,22 @@ def render_sidebar():
 
     data_source = st.sidebar.radio(
         "📁 Select Data Source",
-        ["Upload File(s) (CSV/Excel)", "Use Built-in Sample Dataset", "Connect SQL Database"],
+        ["Upload File(s) (CSV/Excel/SQL)", "Use Built-in Sample Dataset", "Connect SQL Database"],
         index=0
     )
+
 
     df = None
     dataset_name = "Sample Retail Dataset"
 
-    if data_source == "Upload File(s) (CSV/Excel)":
+    if data_source == "Upload File(s) (CSV/Excel/SQL)":
         uploaded_files = st.sidebar.file_uploader(
             "Upload Dataset(s)",
-            type=["csv", "xlsx", "xls"],
+            type=["csv", "xlsx", "xls", "sql", "db", "sqlite", "sqlite3"],
             accept_multiple_files=True,
-            help="Select one or multiple CSV/Excel files"
+            help="Select one or multiple CSV, Excel, .sql script, or .db files to analyze together"
         )
+
         if uploaded_files:
             if len(uploaded_files) == 1:
                 try:

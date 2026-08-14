@@ -3,29 +3,62 @@ import numpy as np
 
 def load_dataset(file_or_path):
     """
-    Load dataset from file buffer or path. Supports CSV and Excel (.xlsx, .xls).
+    Load dataset from file buffer or path. Supports CSV, Excel (.xlsx, .xls), SQL scripts (.sql), and SQLite DB (.db, .sqlite).
     """
-    if isinstance(file_or_path, str):
-        if file_or_path.endswith('.csv'):
-            df = pd.read_csv(file_or_path)
-        elif file_or_path.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file_or_path)
+    filename = file_or_path.lower() if isinstance(file_or_path, str) else getattr(file_or_path, 'name', '').lower()
+
+    if filename.endswith('.csv'):
+        return pd.read_csv(file_or_path)
+    elif filename.endswith(('.xlsx', '.xls')):
+        return pd.read_excel(file_or_path)
+    elif filename.endswith('.sql'):
+        from modules.sql_connector import execute_sql_dump_script, list_tables, load_table_data
+        if hasattr(file_or_path, 'getvalue'):
+            sql_text = file_or_path.getvalue().decode('utf-8', errors='ignore')
+        elif hasattr(file_or_path, 'read'):
+            sql_text = file_or_path.read().decode('utf-8', errors='ignore')
         else:
-            raise ValueError("Unsupported file format. Please upload CSV or Excel file.")
+            with open(file_or_path, 'r', encoding='utf-8', errors='ignore') as f:
+                sql_text = f.read()
+        import os
+        temp_path = os.path.abspath("temp_sql_import.db").replace('\\', '/')
+        engine = execute_sql_dump_script(sql_text, temp_path)
+        tables = list_tables(engine)
+        if not tables:
+            raise ValueError("No SQL tables found in .sql script file.")
+        if len(tables) == 1:
+            return load_table_data(engine, tables[0])
+        else:
+            tbl_dfs = [load_table_data(engine, t) for t in tables]
+            return merge_multiple_datasets(tbl_dfs, mode="join")
+    elif filename.endswith(('.db', '.sqlite', '.sqlite3')):
+        from modules.sql_connector import create_db_engine, list_tables, load_table_data
+        import os
+        if not isinstance(file_or_path, str):
+            temp_path = os.path.abspath(f"temp_db_{getattr(file_or_path, 'name', 'upload.db')}").replace('\\', '/')
+            with open(temp_path, "wb") as f_out:
+                f_out.write(file_or_path.getbuffer())
+            path = temp_path
+        else:
+            path = file_or_path
+        engine = create_db_engine("SQLite", sqlite_path=path)
+        tables = list_tables(engine)
+        if not tables:
+            raise ValueError("No tables found in SQLite database file.")
+        if len(tables) == 1:
+            return load_table_data(engine, tables[0])
+        else:
+            tbl_dfs = [load_table_data(engine, t) for t in tables]
+            return merge_multiple_datasets(tbl_dfs, mode="join")
     else:
-        filename = getattr(file_or_path, 'name', '').lower()
-        if filename.endswith('.csv'):
-            df = pd.read_csv(file_or_path)
-        elif filename.endswith(('.xlsx', '.xls')):
-            df = pd.read_excel(file_or_path)
-        else:
-            # Fallback attempt
-            try:
-                df = pd.read_csv(file_or_path)
-            except Exception:
+        # Fallback attempt
+        try:
+            return pd.read_csv(file_or_path)
+        except Exception:
+            if hasattr(file_or_path, 'seek'):
                 file_or_path.seek(0)
-                df = pd.read_excel(file_or_path)
-    return df
+            return pd.read_excel(file_or_path)
+
 
 def clean_and_validate(df):
     """
