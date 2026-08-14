@@ -24,16 +24,17 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply CSS styling
-apply_custom_styles()
-
 def main():
     # Sidebar
     df_raw, dataset_name, llm_config = render_sidebar()
 
+    # Apply CSS styling dynamically matching selected theme
+    apply_custom_styles(theme=llm_config.get("theme", "plotly_dark"))
+
     if df_raw is None:
         st.warning("⚠️ Please select or upload a dataset using the sidebar to begin.")
         return
+
 
     # Clean & validate dataset automatically
     df_cleaned, health_report = clean_and_validate(df_raw)
