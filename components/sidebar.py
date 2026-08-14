@@ -39,7 +39,7 @@ def render_sidebar():
             "Upload Dataset(s)",
             type=["csv", "xlsx", "xls"],
             accept_multiple_files=True,
-            help="Select one or multiple CSV/Excel files to analyze together"
+            help="Select one or multiple CSV/Excel files"
         )
         if uploaded_files:
             if len(uploaded_files) == 1:
@@ -50,25 +50,40 @@ def render_sidebar():
                 except Exception as e:
                     st.sidebar.error(f"Error loading file: {str(e)}")
             else:
-                st.sidebar.info(f"📁 {len(uploaded_files)} files selected for multi-file analysis.")
-                combine_mode = st.sidebar.radio(
-                    "Multi-File Strategy",
-                    ["Concatenate / Stack Rows", "Join on Common Key Column"],
-                    index=0
-                )
-                mode_key = "concat" if "Concatenate" in combine_mode else "join"
-                join_key = None
-                if mode_key == "join":
-                    join_key = st.sidebar.text_input("Join Key Column", placeholder="e.g. Order_ID (leave blank to auto-detect)")
-                    join_key = join_key.strip() if join_key else None
+                st.sidebar.info(f"📁 {len(uploaded_files)} files uploaded.")
                 
-                try:
-                    from modules.data_processor import merge_multiple_datasets
-                    df = merge_multiple_datasets(uploaded_files, mode=mode_key, join_key=join_key)
-                    dataset_name = f"Combined ({len(uploaded_files)} Files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
-                    st.sidebar.success(f"Combined {len(uploaded_files)} files ➔ {len(df)} total rows")
-                except Exception as e:
-                    st.sidebar.error(f"Multi-file merge error: {str(e)}")
+                # Active File Selection vs Merged Analysis
+                file_options = ["Merged / Combined Dataset"] + [f.name for f in uploaded_files]
+                active_selection = st.sidebar.selectbox("Active Analysis View", file_options, index=0)
+                
+                if active_selection != "Merged / Combined Dataset":
+                    target_file = next(f for f in uploaded_files if f.name == active_selection)
+                    try:
+                        df = load_dataset(target_file)
+                        dataset_name = target_file.name
+                        st.sidebar.success(f"Viewing `{dataset_name}` ({len(df)} rows)")
+                    except Exception as e:
+                        st.sidebar.error(f"Error loading {target_file.name}: {str(e)}")
+                else:
+                    combine_mode = st.sidebar.radio(
+                        "Multi-File Merge Strategy",
+                        ["Concatenate / Stack Rows", "Join on Common Key Column"],
+                        index=0
+                    )
+                    mode_key = "concat" if "Concatenate" in combine_mode else "join"
+                    join_key = None
+                    if mode_key == "join":
+                        join_key = st.sidebar.text_input("Join Key Column", placeholder="e.g. Order_ID (leave blank to auto-detect)")
+                        join_key = join_key.strip() if join_key else None
+                    
+                    try:
+                        from modules.data_processor import merge_multiple_datasets
+                        df = merge_multiple_datasets(uploaded_files, mode=mode_key, join_key=join_key)
+                        dataset_name = f"Combined ({len(uploaded_files)} Files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
+                        st.sidebar.success(f"Combined {len(uploaded_files)} files ➔ {len(df)} rows")
+                    except Exception as e:
+                        st.sidebar.error(f"Multi-file merge error: {str(e)}")
+
 
 
     elif data_source == "Use Built-in Sample Dataset":
