@@ -1,15 +1,17 @@
 import streamlit as st
 
-def apply_custom_styles(theme="plotly_dark", *args, **kwargs):
+def apply_custom_styles(*args, **kwargs):
     """
     Applies modern glassmorphism aesthetic (Dark or Light) matching the selected theme.
     """
+    theme = "plotly_dark"
     if "theme" in kwargs:
         theme = kwargs["theme"]
     elif args:
         theme = args[0]
         
     is_light = (str(theme) == "plotly_white")
+
 
     
     bg_card = "linear-gradient(135deg, #FFFFFF, #F1F5F9)" if is_light else "linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9))"
