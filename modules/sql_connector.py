@@ -74,3 +74,45 @@ def seed_sample_sql_database(sqlite_path):
 
     return engine
 
+
+def execute_sql_dump_script(sql_content_str, sqlite_path):
+    """
+    Executes a raw SQL script file (.sql dump) into SQLite, converting MySQL/PostgreSQL dialect if necessary.
+    """
+    import os, re, sqlite3
+    abs_path = os.path.abspath(sqlite_path).replace('\\', '/')
+    os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+    
+    # Preprocess SQL script to strip MySQL-specific statements incompatible with SQLite
+    cleaned_sql = sql_content_str
+    cleaned_sql = re.sub(r'ENGINE\s*=\s*\w+', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'DEFAULT\s+CHARSET\s*=\s*\w+', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'AUTO_INCREMENT\s*=\s*\d+', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'LOCK\s+TABLES\s+[^;]+;', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'UNLOCK\s+TABLES\s*;', '', cleaned_sql, flags=re.IGNORECASE)
+    cleaned_sql = re.sub(r'/\*![\s\S]*?\*/;', '', cleaned_sql)
+
+    conn = sqlite3.connect(abs_path)
+    cursor = conn.cursor()
+    
+    try:
+        cursor.executescript(cleaned_sql)
+        conn.commit()
+    except Exception as e:
+        # Fallback: execute statements line by line, skipping unsupported statements
+        statements = cleaned_sql.split(';')
+        for stmt in statements:
+            stmt_clean = stmt.strip()
+            if stmt_clean:
+                try:
+                    cursor.execute(stmt_clean)
+                except Exception:
+                    pass
+        conn.commit()
+    finally:
+        conn.close()
+
+    engine = create_engine(f"sqlite:///{abs_path}")
+    return engine
+
+

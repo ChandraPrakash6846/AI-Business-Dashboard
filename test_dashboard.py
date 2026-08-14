@@ -43,13 +43,21 @@ def test_all():
     print(f"[SUCCESS] NL Query Executed: {summary}")
     assert not res_df.empty, "NL query returned empty dataframe"
 
-    # 4. Test SQLite Database & Built-in SQL Seeder
-    from modules.sql_connector import seed_sample_sql_database, list_tables
+    # 4. Test SQLite Database & Built-in SQL Seeder / SQL Dump Executer
+    from modules.sql_connector import seed_sample_sql_database, execute_sql_dump_script, list_tables
     db_test_path = os.path.join(os.path.dirname(__file__), "test_sample.db")
     sql_engine = seed_sample_sql_database(db_test_path)
     sql_tables = list_tables(sql_engine)
     print(f"[SUCCESS] Built-in SQL Database Seeded: Found tables {sql_tables}")
     assert "sales_orders" in sql_tables and "product_catalog" in sql_tables, "SQL Seeder failed"
+
+    # Test .sql script execution
+    sample_sql_script = "CREATE TABLE test_sql_dump (id INT, val TEXT); INSERT INTO test_sql_dump VALUES (1, 'hello');"
+    dump_engine = execute_sql_dump_script(sample_sql_script, os.path.join(os.path.dirname(__file__), "test_dump.db"))
+    dump_tables = list_tables(dump_engine)
+    print(f"[SUCCESS] SQL Dump Script Executed: Found tables {dump_tables}")
+    assert "test_sql_dump" in dump_tables, ".SQL script parser failed"
+
 
     init_db()
     kpis = {"Total Sales": "$25,000.00", "Net Profit": "$5,000.00"}
