@@ -38,10 +38,10 @@ def render_sidebar():
     if data_source == "Upload File(s) (CSV/Excel/SQL)":
         uploaded_files = st.sidebar.file_uploader(
             "Upload Dataset(s)",
-            type=["csv", "xlsx", "xls", "sql", "db", "sqlite", "sqlite3"],
             accept_multiple_files=True,
-            help="Select one or multiple CSV, Excel, .sql script, or .db files to analyze together"
+            help="Select all files together (Ctrl+A or drag box) - CSV, Excel, .sql script, or .db files supported"
         )
+
 
         if uploaded_files:
             if len(uploaded_files) == 1:
@@ -108,10 +108,10 @@ def render_sidebar():
         if sql_mode == "Local SQLite Database or .sql Script":
             uploaded_dbs = st.sidebar.file_uploader(
                 "Upload .db, .sqlite or .sql Script File(s)",
-                type=["db", "sqlite", "sqlite3", "sql"],
                 accept_multiple_files=True,
-                help="Select one or multiple .sql or .db files"
+                help="Select all .sql or .db files together (Ctrl+A or drag box)"
             )
+
             default_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dashboard_history.db")).replace('\\', '/')
             db_file_path = st.sidebar.text_input("Or Enter Database / .sql File Path", value=default_db_path)
             
