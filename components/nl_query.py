@@ -8,7 +8,9 @@ def render_nl_query_engine(df, llm_config):
     """
     Renders Natural Language Query interface.
     """
+    px.defaults.template = llm_config.get("theme", "plotly_dark")
     st.subheader("🤖 Natural Language Data Query Assistant")
+
     st.caption("Ask questions about your business dataset in plain English (e.g., *'Total sales by category'*, *'Which region generated highest profit?'*, *'Show sales over time'*).")
 
     # Preset sample query buttons

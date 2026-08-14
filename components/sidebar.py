@@ -27,59 +27,49 @@ def render_sidebar():
 
     data_source = st.sidebar.radio(
         "📁 Select Data Source",
-        ["Upload File (CSV/Excel)", "Upload Multiple Files (Concatenate/Merge)", "Use Built-in Sample Dataset", "Connect SQL Database"],
-        index=2
+        ["Upload File(s) (CSV/Excel)", "Use Built-in Sample Dataset", "Connect SQL Database"],
+        index=0
     )
 
     df = None
     dataset_name = "Sample Retail Dataset"
 
-    if data_source == "Upload File (CSV/Excel)":
-        uploaded_file = st.sidebar.file_uploader(
-            "Upload Dataset",
-            type=["csv", "xlsx", "xls"],
-            help="Upload business dataset in CSV or Excel format"
-        )
-        if uploaded_file is not None:
-            try:
-                df = load_dataset(uploaded_file)
-                dataset_name = uploaded_file.name
-                st.sidebar.success(f"Loaded `{dataset_name}` ({len(df)} rows)")
-            except Exception as e:
-                st.sidebar.error(f"Error loading file: {str(e)}")
-
-    elif data_source == "Upload Multiple Files (Concatenate/Merge)":
+    if data_source == "Upload File(s) (CSV/Excel)":
         uploaded_files = st.sidebar.file_uploader(
-            "Upload Multiple Datasets",
+            "Upload Dataset(s)",
             type=["csv", "xlsx", "xls"],
             accept_multiple_files=True,
-            help="Upload multiple CSV/Excel files to combine them into one dataset"
+            help="Select one or multiple CSV/Excel files to analyze together"
         )
-        if uploaded_files and len(uploaded_files) > 0:
-            merge_mode = st.sidebar.radio(
-                "Multi-File Combine Strategy",
-                ["Concatenate / Stack Rows", "Join / Merge on Common Key Column"],
-                index=0
-            )
-            mode_key = "concat" if merge_mode == "Concatenate / Stack Rows" else "join"
-            
-            join_key = None
-            if mode_key == "join":
-                join_key = st.sidebar.text_input("Common Key Column (e.g. Order_ID, Customer_ID)", placeholder="Leave blank to auto-detect")
-                join_key = join_key.strip() if join_key else None
-
-            if st.sidebar.button("🔗 Combine & Process Files", type="primary"):
+        if uploaded_files:
+            if len(uploaded_files) == 1:
+                try:
+                    df = load_dataset(uploaded_files[0])
+                    dataset_name = uploaded_files[0].name
+                    st.sidebar.success(f"Loaded `{dataset_name}` ({len(df)} rows)")
+                except Exception as e:
+                    st.sidebar.error(f"Error loading file: {str(e)}")
+            else:
+                st.sidebar.info(f"📁 {len(uploaded_files)} files selected for multi-file analysis.")
+                combine_mode = st.sidebar.radio(
+                    "Multi-File Strategy",
+                    ["Concatenate / Stack Rows", "Join on Common Key Column"],
+                    index=0
+                )
+                mode_key = "concat" if "Concatenate" in combine_mode else "join"
+                join_key = None
+                if mode_key == "join":
+                    join_key = st.sidebar.text_input("Join Key Column", placeholder="e.g. Order_ID (leave blank to auto-detect)")
+                    join_key = join_key.strip() if join_key else None
+                
                 try:
                     from modules.data_processor import merge_multiple_datasets
                     df = merge_multiple_datasets(uploaded_files, mode=mode_key, join_key=join_key)
-                    dataset_name = f"Merged ({len(uploaded_files)} files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
-                    st.sidebar.success(f"Successfully combined {len(uploaded_files)} files into {len(df)} rows!")
-                    st.session_state["multi_merged_df"] = (df, dataset_name)
+                    dataset_name = f"Combined ({len(uploaded_files)} Files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
+                    st.sidebar.success(f"Combined {len(uploaded_files)} files ➔ {len(df)} total rows")
                 except Exception as e:
-                    st.sidebar.error(f"Merge error: {str(e)}")
+                    st.sidebar.error(f"Multi-file merge error: {str(e)}")
 
-            if "multi_merged_df" in st.session_state and df is None:
-                df, dataset_name = st.session_state["multi_merged_df"]
 
     elif data_source == "Use Built-in Sample Dataset":
 

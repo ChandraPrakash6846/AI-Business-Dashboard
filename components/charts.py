@@ -9,6 +9,7 @@ def render_interactive_charts(df, theme="plotly_dark"):
     """
     Renders customizable interactive Plotly charts dashboard tab.
     """
+    px.defaults.template = theme
     mapping = get_smart_column_mapping(df)
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
@@ -32,6 +33,7 @@ def render_interactive_charts(df, theme="plotly_dark"):
 
     st.divider()
 
+    fig = None
     if chart_type == "Bar Chart":
         if color_col:
             agg_df = df.groupby([x_axis, color_col])[y_axis].sum().reset_index()
@@ -42,6 +44,7 @@ def render_interactive_charts(df, theme="plotly_dark"):
             fig = px.bar(agg_df, x=x_axis, y=y_axis, color=y_axis,
                          color_continuous_scale="Viridis",
                          title=f"Total {y_axis} by {x_axis}", template=theme)
+
         st.plotly_chart(fig, use_container_width=True)
 
     elif chart_type == "Line Chart (Time Series)":

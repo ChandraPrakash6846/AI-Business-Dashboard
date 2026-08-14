@@ -8,7 +8,9 @@ def render_advanced_analytics(df, theme="plotly_dark"):
     """
     Renders correlation matrix, anomaly detection, and automated analytical insights.
     """
+    px.defaults.template = theme
     st.subheader("🔍 Correlation, Trend & Anomaly Diagnostics")
+
     
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     
