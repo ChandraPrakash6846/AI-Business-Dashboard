@@ -114,9 +114,27 @@ def get_smart_column_mapping(df):
     Identifies probability mapping of columns to business domains:
     sales, revenue, profit, cost, quantity, date, category, region, customer.
     """
+    # Auto-create derived sales & profit if quantityOrdered & priceEach are present
     cols = df.columns
     cols_lower = [c.lower() for c in cols]
     
+    if "sales" not in cols_lower and "revenue" not in cols_lower:
+        if "quantityordered" in cols_lower and "priceeach" in cols_lower:
+            q_col = cols[cols_lower.index("quantityordered")]
+            p_col = cols[cols_lower.index("priceeach")]
+            df['Sales'] = pd.to_numeric(df[q_col], errors='coerce') * pd.to_numeric(df[p_col], errors='coerce')
+            cols = df.columns
+            cols_lower = [c.lower() for c in cols]
+
+    if "profit" not in cols_lower:
+        if "sales" in cols_lower and "buyprice" in cols_lower and "quantityordered" in cols_lower:
+            s_col = cols[cols_lower.index("sales")]
+            b_col = cols[cols_lower.index("buyprice")]
+            q_col = cols[cols_lower.index("quantityordered")]
+            df['Profit'] = pd.to_numeric(df[s_col], errors='coerce') - (pd.to_numeric(df[b_col], errors='coerce') * pd.to_numeric(df[q_col], errors='coerce'))
+            cols = df.columns
+            cols_lower = [c.lower() for c in cols]
+
     def match(keywords):
         for kw in keywords:
             for i, c in enumerate(cols_lower):
@@ -125,50 +143,75 @@ def get_smart_column_mapping(df):
         return None
 
     mapping = {
-        "sales": match(['sales', 'revenue', 'turnover', 'amount', 'total_amount', 'price']),
+        "sales": match(['sales', 'revenue', 'turnover', 'amount', 'total_amount', 'priceeach', 'price']),
         "profit": match(['profit', 'margin', 'gain', 'net_income', 'earnings']),
-        "quantity": match(['qty', 'quantity', 'count', 'units']),
-        "date": match(['date', 'time', 'order_date', 'day', 'timestamp']),
-        "category": match(['category', 'type', 'group', 'product_type', 'department']),
+        "quantity": match(['qty', 'quantity', 'quantityordered', 'count', 'units']),
+        "date": match(['date', 'time', 'orderdate', 'day', 'timestamp']),
+        "category": match(['category', 'productline', 'type', 'group', 'product_type', 'department']),
         "region": match(['region', 'country', 'state', 'city', 'location', 'zone']),
-        "customer": match(['customer', 'client', 'user', 'buyer', 'customer_name'])
+        "customer": match(['customername', 'customer_name', 'customer', 'client', 'user', 'buyer'])
     }
     return mapping
 
-def merge_multiple_datasets(file_list, mode="concat", join_key=None):
+def merge_multiple_datasets(file_list, mode="auto", join_key=None):
     """
     Merges or concatenates multiple uploaded files (CSV/Excel) into a unified DataFrame.
+    - mode="auto": Automatically detects whether files are relational tables or sales period files.
     - mode="concat": Vertically stacks files (e.g. Sales_Jan.csv, Sales_Feb.csv)
-    - mode="join": Horizontally joins files on common key column (e.g. Order_ID)
+    - mode="join": Horizontally joins files on common primary/foreign key columns
     """
     if not file_list:
         raise ValueError("No files provided for merging.")
 
-    dfs = []
-    for f in file_list:
+    file_tuples = []
+    for idx, f in enumerate(file_list):
+        fname = getattr(f, 'name', str(f)).lower()
         df_temp = load_dataset(f)
-        dfs.append(df_temp)
+        file_tuples.append((fname, df_temp))
 
-    if len(dfs) == 1:
-        return dfs[0]
+    if len(file_tuples) == 1:
+        return file_tuples[0][1]
 
-    if mode == "concat":
-        merged_df = pd.concat(dfs, ignore_index=True)
-    elif mode == "join":
-        if not join_key:
-            # Auto-detect common column if not provided
-            common_cols = list(set.intersection(*[set(d.columns) for d in dfs]))
-            join_key = common_cols[0] if common_cols else None
-            
-        if not join_key:
-            raise ValueError("No common key column found across uploaded files for joining.")
+    # Auto-detect relational database tables (e.g., orders, orderdetails, customers, employees, offices)
+    relational_keywords = ['order', 'customer', 'employee', 'office', 'product', 'detail', 'payment']
+    is_relational = any(any(kw in fname for fname, _ in file_tuples) for kw in relational_keywords)
 
-        merged_df = dfs[0]
-        for next_df in dfs[1:]:
-            # Drop duplicated non-key columns before merging to prevent collision
-            overlapping = [c for c in next_df.columns if c in merged_df.columns and c != join_key]
-            next_df_clean = next_df.drop(columns=overlapping)
-            merged_df = pd.merge(merged_df, next_df_clean, on=join_key, how="outer")
+    if mode == "auto":
+        mode = "join" if is_relational else "concat"
 
-    return merged_df
+    if mode == "join":
+        # Relational Smart Join Strategy
+        # Sort files so fact tables come first
+        sorted_files = sorted(file_tuples, key=lambda item: 0 if any(k in item[0] for k in ['detail', 'line', 'item', 'order', 'fact', 'sale']) else 1)
+        
+        merged_df = sorted_files[0][1].copy()
+        
+        for fname, next_df in sorted_files[1:]:
+            # Find common join columns
+            common_keys = [c for c in next_df.columns if c in merged_df.columns]
+            if common_keys:
+                key = common_keys[0]
+                # Drop overlapping non-key columns to prevent collision
+                overlap = [c for c in next_df.columns if c in merged_df.columns and c != key]
+                next_clean = next_df.drop(columns=overlap)
+                merged_df = pd.merge(merged_df, next_clean, on=key, how="left")
+            else:
+                # Check foreign key mapping (e.g., salesRepEmployeeNumber -> employeeNumber)
+                fk_mapped = False
+                if "salesrepemployeenumber" in [c.lower() for c in merged_df.columns] and "employeenumber" in [c.lower() for c in next_df.columns]:
+                    fk1 = [c for c in merged_df.columns if c.lower() == "salesrepemployeenumber"][0]
+                    fk2 = [c for c in next_df.columns if c.lower() == "employeenumber"][0]
+                    overlap = [c for c in next_df.columns if c in merged_df.columns and c != fk2]
+                    next_clean = next_df.drop(columns=overlap)
+                    merged_df = pd.merge(merged_df, next_clean, left_on=fk1, right_on=fk2, how="left")
+                    fk_mapped = True
 
+                if not fk_mapped:
+                    # Fallback to concat if no common key
+                    merged_df = pd.concat([merged_df, next_df], ignore_index=True)
+
+        return merged_df
+
+    else:
+        # Concatenate / Stack Rows
+        return pd.concat([df for _, df in file_tuples], ignore_index=True)

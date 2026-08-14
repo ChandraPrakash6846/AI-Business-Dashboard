@@ -66,23 +66,24 @@ def render_sidebar():
                         st.sidebar.error(f"Error loading {target_file.name}: {str(e)}")
                 else:
                     combine_mode = st.sidebar.radio(
-                        "Multi-File Merge Strategy",
-                        ["Concatenate / Stack Rows", "Join on Common Key Column"],
+                        "Multi-File Strategy",
+                        ["Smart Relational Join (Primary/Foreign Keys)", "Concatenate / Stack Rows"],
                         index=0
                     )
-                    mode_key = "concat" if "Concatenate" in combine_mode else "join"
+                    mode_key = "join" if "Relational" in combine_mode else "concat"
                     join_key = None
                     if mode_key == "join":
-                        join_key = st.sidebar.text_input("Join Key Column", placeholder="e.g. Order_ID (leave blank to auto-detect)")
-                        join_key = join_key.strip() if join_key else None
+                        join_key_input = st.sidebar.text_input("Join Key Column", placeholder="e.g. orderNumber, customerNumber (blank = auto)")
+                        join_key = join_key_input.strip() if join_key_input else None
                     
                     try:
                         from modules.data_processor import merge_multiple_datasets
                         df = merge_multiple_datasets(uploaded_files, mode=mode_key, join_key=join_key)
-                        dataset_name = f"Combined ({len(uploaded_files)} Files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
-                        st.sidebar.success(f"Combined {len(uploaded_files)} files ➔ {len(df)} rows")
+                        dataset_name = f"Smart Relational Joined ({len(uploaded_files)} Files: {', '.join([f.name for f in uploaded_files[:2]])}...)"
+                        st.sidebar.success(f"Smart Joined {len(uploaded_files)} files ➔ {len(df)} rows")
                     except Exception as e:
-                        st.sidebar.error(f"Multi-file merge error: {str(e)}")
+                        st.sidebar.error(f"Multi-file join error: {str(e)}")
+
 
 
 
