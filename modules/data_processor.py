@@ -110,11 +110,16 @@ def clean_and_validate(df):
                 except Exception:
                     pass
             
-            # Attempt numeric conversion (stripping $, commas, %)
-            clean_str = cleaned_df[col].str.replace('$', '', regex=False).str.replace(',', '', regex=False).str.replace('%', '', regex=False).str.strip()
+            # Attempt numeric conversion (stripping $, commas, %, 'free', and extracting numbers)
+            clean_str = cleaned_df[col].astype(str).str.lower().str.replace('free', '0', regex=False).str.replace('not available', '0', regex=False).str.replace('$', '', regex=False).str.replace(',', '', regex=False).str.replace('%', '', regex=False).str.strip()
             numeric_converted = pd.to_numeric(clean_str, errors='coerce')
-            if numeric_converted.notnull().sum() > 0.5 * len(cleaned_df):
+            if numeric_converted.notnull().sum() > 0.3 * len(cleaned_df):
                 cleaned_df[col] = numeric_converted
+            else:
+                extracted = clean_str.str.extract(r'(\d+(?:\.\d+)?)')[0]
+                num_extracted = pd.to_numeric(extracted, errors='coerce')
+                if num_extracted.notnull().sum() > 0.3 * len(cleaned_df):
+                    cleaned_df[col] = num_extracted
 
     # 4. Impute Missing Values
     missing_count = cleaned_df.isnull().sum().sum()
