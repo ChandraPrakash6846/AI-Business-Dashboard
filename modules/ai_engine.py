@@ -125,6 +125,52 @@ def detect_anomalies(df):
     anomalies = df_result[df_result['is_anomaly']]
     return df_result, anomalies
 
+def answer_general_question(query):
+    """Answer general knowledge questions using built-in AI knowledge base."""
+    q = query.lower().strip()
+
+    knowledge = [
+        (['ram', 'random access memory'],
+         "**RAM (Random Access Memory)** is a type of volatile computer memory that temporarily stores data the CPU needs quick access to. It's much faster than hard drives or SSDs. When you open programs, they load into RAM for fast processing. RAM clears when the computer powers off. Common types include DDR4 and DDR5, with typical sizes ranging from 4GB to 64GB for consumer PCs."),
+
+        (['cpu', 'processor', 'central processing unit'],
+         "**CPU (Central Processing Unit)** is the 'brain' of a computer that performs calculations and executes instructions. Modern CPUs have multiple cores for parallel processing. Key manufacturers include Intel and AMD. CPU speed is measured in GHz."),
+
+        (['gpu', 'graphics card'],
+         "**GPU (Graphics Processing Unit)** is a specialized processor designed for rendering graphics and parallel computations. Used for gaming, video editing, AI/ML model training, and scientific simulations."),
+
+        (['machine learning', 'ml '],
+         "**Machine Learning (ML)** is a branch of AI where algorithms learn patterns from data to make predictions without being explicitly programmed. Key types: Supervised, Unsupervised, and Reinforcement Learning."),
+
+        (['artificial intelligence', 'what is ai'],
+         "**Artificial Intelligence (AI)** is the simulation of human intelligence by machines. It includes Machine Learning, Deep Learning, Natural Language Processing (NLP), Computer Vision, and Robotics."),
+
+        (['python'],
+         "**Python** is a versatile high-level programming language widely used in Data Science, Machine Learning, Web Development, Automation, and Scripting due to its simple syntax and vast ecosystem."),
+
+        (['sql', 'database query'],
+         "**SQL (Structured Query Language)** is the standard language for querying, updating, and managing relational databases like PostgreSQL, MySQL, SQLite, and SQL Server."),
+
+        (['data science'],
+         "**Data Science** combines statistics, data analysis, machine learning, and domain knowledge to extract actionable business insights from raw structured and unstructured data."),
+
+        (['kpi', 'key performance indicator'],
+         "**KPI (Key Performance Indicator)** is a quantifiable metric used to measure progress toward strategic business goals (e.g. Total Revenue, Net Profit Margin, Customer Acquisition Cost)."),
+    ]
+
+    for keywords, answer in knowledge:
+        if any(kw in q for kw in keywords):
+            return f"🤖 **AI Answer:**\n\n{answer}"
+
+    if any(w in q for w in ['hello', 'hi ', 'hey']):
+        return "🤖 **Hello!** I'm your AI Business Assistant. Ask me questions about your dataset OR any general tech/business questions!"
+
+    if any(w in q for w in ['thank', 'thanks']):
+        return "🤖 **You're welcome!** Feel free to ask more questions."
+
+    return None
+
+
 def process_natural_language_query(query, df):
     """
     Parses natural language user queries and returns:
@@ -134,6 +180,11 @@ def process_natural_language_query(query, df):
     """
     q = query.lower().strip()
     mapping = get_smart_column_mapping(df)
+
+    # First check general knowledge questions
+    general_ans = answer_general_question(query)
+    if general_ans:
+        return pd.DataFrame(), "text", general_ans, None, None
     
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
