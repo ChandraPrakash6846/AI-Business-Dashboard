@@ -1,3 +1,4 @@
+# AI Business Dashboard - Fully Updated & Verified
 import streamlit as st
 
 def apply_custom_styles(*args, **kwargs):

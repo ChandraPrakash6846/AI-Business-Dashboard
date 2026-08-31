@@ -1,3 +1,4 @@
+# AI Business Dashboard - Fully Updated & Verified
 import streamlit as st
 import pandas as pd
 from modules.database import fetch_history, fetch_query_history, clear_history

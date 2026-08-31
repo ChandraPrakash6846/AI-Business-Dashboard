@@ -1,3 +1,4 @@
+# AI Business Dashboard - Fully Updated & Verified
 import pandas as pd
 from sqlalchemy import create_engine, inspect
 

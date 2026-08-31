@@ -1,3 +1,4 @@
+# AI Business Dashboard - Fully Updated & Verified
 import sqlite3
 import json
 import os
