@@ -1,117 +1,198 @@
-# AI Business Dashboard - Fully Updated & Verified
+# 📊 AI Business Dashboard
 
-> **Internship Assignment Project Submission**  
-> **Developer / Author:** Chandra Prakash Choudhary  
-> **GitHub:** [ChandraPrakash6846](https://github.com/ChandraPrakash6846)  
-> **LinkedIn:** [Chandra Prakash Choudhary](https://www.linkedin.com/in/chandra-prakash-choudhary-17b96b212/)  
-> **Domain:** Artificial Intelligence & Business Intelligence  
-> **Objective:** Design and implement an AI-powered Business Dashboard that automates data cleaning, generates executive KPI cards, renders interactive visualizations, conducts statistical anomaly diagnostics, answers natural language data queries, and exports PDF/Excel reports.
+An AI-powered Business Dashboard that analyzes business datasets, creates interactive visualizations, provides insights, and allows users to ask questions in natural language.
 
+> **No API Key Required** — All AI features use built-in statistical analysis.
 
 ---
 
-## 📋 Internship Assignment Compliance Checklist
+## ✨ Features
 
-This project was built to satisfy all requirements specified in the Internship Assignment specification:
-
-| # | Requirement | Status | Project Implementation |
-| :--- | :--- | :---: | :--- |
-| 1 | **Upload CSV/Excel & Multi-File Datasets** | ✅ **Passed** | Built-in file uploader supporting single & multi-file concatenation/merging. |
-| 2 | **Connect to a SQL database** *(Optional Bonus)* | ✅ **Passed** | `SQLAlchemy` integration supporting SQLite, PostgreSQL, and MySQL. |
-| 3 | **Automatically clean and validate data** | ✅ **Passed** | Auto-detects dates, imputes missing values (median/mode), and trims duplicates. |
-| 4 | **Generate KPI cards** | ✅ **Passed** | Dynamic metric cards: Sales, Net Profit, Profit Margin %, AOV, Orders, Customers. |
-| 5 | **Create interactive charts and dashboards** | ✅ **Passed** | Plotly interactive visualizer (Bar, Line, Pie, Scatter, Box plot) with theme toggles. |
-| 6 | **Perform trend, correlation, and anomaly analysis** | ✅ **Passed** | Pearson correlation heatmap + `Scikit-Learn` `IsolationForest` anomaly scan. |
-| 7 | **Provide AI-generated business insights** | ✅ **Passed** | Statistical executive insight engine + optional OpenAI/Ollama LLM integration. |
-| 8 | **Support natural language queries** | ✅ **Passed** | Plain English query interpreter with text filtering and auto-chart rendering. |
-| 9 | **Export reports in PDF or Excel format** | ✅ **Passed** | 1-click PDF Report generator (`ReportLab`) & formatted Excel exporter (`openpyxl`). |
-| 10 | **Maintain analysis history** | ✅ **Passed** | SQLite database (`dashboard_history.db`) tracking dataset sessions and query logs. |
-
+| Feature | Description |
+|---------|-------------|
+| 📁 **Data Upload** | Upload CSV, Excel (.xlsx/.xls), and SQLite databases |
+| 🧹 **Auto Cleaning** | Removes duplicates, fills missing values, detects outliers, converts date columns |
+| 📈 **KPI Cards** | Auto-detects Sales, Revenue, Profit, Customers with growth metrics |
+| 📊 **Interactive Charts** | Bar, Line, Pie, Scatter, Histogram, Box Plot, Area — all interactive (Plotly) |
+| 🔍 **Advanced Analysis** | Trend analysis with moving averages, Pearson correlation matrix, Z-score anomaly detection |
+| 🤖 **AI Insights** | Statistical engine generates 8-10 business insights with recommendations |
+| 💬 **Natural Language Queries** | Ask questions like "What is the total revenue by region?" |
+| 📥 **Export Reports** | Download Excel workbooks and PDF reports |
+| 📜 **Analysis History** | SQLite-backed log of all analysis actions |
 
 ---
 
-## 🌟 Key Technical Features
+## 🚀 Quick Start (3 Steps)
 
-1. **Universal Multi-File Auto-Merger & Relational Database Auto-Joiner (`modules/data_processor.py`)**
-   - Supports uploading single or multiple files (`.csv`, `.xlsx`, `.sql`, `.db`) simultaneously.
-   - Automatically detects relational database schemas (Sakila, Northwind, ClassicModels) and performs foreign-key joins (`orders` + `orderdetails` + `customers` + `employees` + `offices`).
+### 1. Install Dependencies
 
-2. **SQL Script (.sql) Dialect Engine (`modules/sql_connector.py`)**
-   - Parses raw `.sql` script dumps (MySQL / PostgreSQL / SQLite), strips incompatible DDL constraints, and executes statements into a unified SQLite database engine.
+```bash
+pip install -r requirements.txt
+```
 
-3. **Machine Learning Anomaly Engine (`modules/ai_engine.py`)**
-   - Implements Scikit-learn's `IsolationForest` unsupervised learning model to scan numerical fields for statistical business anomalies and high-risk transactions.
+### 2. Run the Dashboard
 
-4. **Natural Language Processing Assistant (`components/nl_query.py`)**
-   - Translates user questions like *"Total sales by category"* or *"Profit by region"* into filtered Pandas DataFrames and renders tailored Plotly charts instantly.
+```bash
+streamlit run app.py
+```
 
-5. **Executive PDF & Excel Reporting Engine (`modules/export_engine.py`)**
-   - Generates publication-ready PDF summaries with ReportLab and multi-tab structured Excel workbooks with openpyxl.
+### 3. Open in Browser
 
+The app opens automatically at **http://localhost:8501**
 
 ---
 
-## 🏗️ Project Architecture
+## 📂 Project Structure
 
 ```
 ai-business-dashboard/
-├── app.py                      # Main Streamlit application & layout
-├── config.py                   # Glassmorphism theme & CSS design system
-├── components/
-│   ├── sidebar.py              # File uploader, SQL database connector & settings
-│   ├── kpi_cards.py            # Dynamic KPI metric cards component
-│   ├── charts.py               # Plotly interactive chart visualizer
-│   ├── analytics.py            # Correlation matrix & Isolation Forest anomaly scan
-│   ├── nl_query.py             # Natural Language Query Engine UI
-│   └── history.py              # SQLite session & query history log
-├── modules/
-│   ├── data_processor.py       # Data cleaner, validator & column mapper
-│   ├── sql_connector.py        # SQLAlchemy database connection manager
-│   ├── ai_engine.py            # Statistical engine & NL query interpreter
-│   ├── export_engine.py        # PDF & Excel report generator
-│   └── database.py             # SQLite database history manager
+├── app.py                      # Main Streamlit application
+├── requirements.txt            # Python dependencies
+├── README.md                   # Project documentation
+├── test_dashboard.py           # Integration test suite
+├── utils/
+│   ├── __init__.py
+│   ├── data_loader.py          # CSV/Excel/SQLite upload handler
+│   ├── data_cleaner.py         # Auto data cleaning & validation
+│   ├── kpi_generator.py        # KPI detection & calculation
+│   ├── chart_generator.py      # Plotly chart factory functions
+│   ├── analysis.py             # Trend, correlation & anomaly analysis
+│   ├── ai_insights.py          # Rule-based AI insight engine
+│   ├── nl_query.py             # Natural language query processor
+│   ├── export_utils.py         # Excel & PDF export
+│   └── history.py              # SQLite analysis history tracker
 ├── sample_data/
-│   └── retail_sales_sample.csv # Sample dataset for instant evaluation
-├── requirements.txt            # Python dependencies list
-├── README.md                   # Technical assignment submission docs
-├── USER_MANUAL.md              # User manual & visual feature guide
-├── PRESENTATION.html           # Interactive HTML slide deck for project defense
-├── DEMO_GUIDE.md               # Video demo script & walkthrough guide
-└── test_dashboard.py           # Automated test suite
+│   └── sample_sales.csv        # Built-in sample dataset
+└── assets/
+    └── style.css               # Custom dashboard styling
 ```
 
 ---
 
-## ⚙️ Quick Start & Installation
+## 🛠 Technology Stack
 
-1. **Clone/Navigate to Project Directory**:
-   ```bash
-   cd ai-business-dashboard
-   ```
-
-2. **Install Python Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Launch the Dashboard**:
-   ```bash
-   streamlit run app.py
-   ```
-
-4. Open your web browser at `http://localhost:8501`.
+| Technology | Purpose |
+|-----------|---------|
+| **Python 3.10+** | Core programming language |
+| **Streamlit** | Web dashboard framework |
+| **Pandas** | Data manipulation and analysis |
+| **Plotly** | Interactive chart visualizations |
+| **NumPy** | Numerical computations |
+| **SciPy** | Statistical analysis (Z-scores, Shapiro-Wilk, correlation) |
+| **SQLAlchemy** | Database connectivity |
+| **SQLite** | Analysis history storage |
+| **openpyxl** | Excel file reading/writing |
+| **fpdf2** | PDF report generation |
 
 ---
 
-## 📂 Expected Deliverables Summary
+## 📖 User Manual
 
-- **Source Code**: Clean, modular Python code structured into `modules/` and `components/`.
-- **Project Documentation**: [README.md](file:///C:/Users/choud/.gemini/antigravity/scratch/ai-business-dashboard/README.md)
-- **User Manual**: [USER_MANUAL.md](file:///C:/Users/choud/.gemini/antigravity/scratch/ai-business-dashboard/USER_MANUAL.md)
-- **Presentation**: [PRESENTATION.html](file:///C:/Users/choud/.gemini/antigravity/scratch/ai-business-dashboard/PRESENTATION.html)
-- **Demo Script**: [DEMO_GUIDE.md](file:///C:/Users/choud/.gemini/antigravity/scratch/ai-business-dashboard/DEMO_GUIDE.md)
+### Uploading Data
+
+1. Click **"Browse files"** in the sidebar or drag & drop your file
+2. Supported formats: `.csv`, `.xlsx`, `.xls`, `.db`, `.sqlite`
+3. Or check **"Use Sample Data"** to explore with the built-in dataset
+
+### Data Cleaning (Automatic)
+
+When data is loaded, the system automatically:
+- Removes exact duplicate rows
+- Fills missing numeric values with column median
+- Fills missing categorical values with most frequent value
+- Converts date-like strings to datetime format
+- Detects outliers using the IQR method
+
+A cleaning summary appears in the sidebar.
+
+### Dashboard Page
+
+- **KPI Cards**: Auto-detected metrics (Sales, Revenue, Profit, Customers, Cost, Rating) with growth percentages
+- **Interactive Charts**: Select chart type, X/Y axes, and optional color grouping
+- **Data Preview**: Expandable raw data view and summary statistics
+
+### Analysis Page
+
+- **Trend Analysis**: Select date and value columns to see moving averages and growth rate
+- **Correlation**: Pearson correlation heatmap with strong correlation pairs highlighted
+- **Anomaly Detection**: Z-score based detection with adjustable threshold
+- **Distribution**: Statistical tests, histogram, and box plot for any numeric column
+
+### AI Insights Page
+
+Automatically generates 8-10 insights covering:
+- Top performers by category
+- Growth trends over time
+- Concentration risk analysis
+- Outlier detection
+- Correlation patterns
+- Seasonal patterns
+- Distribution skewness
+- Data quality assessment
+
+Each insight includes a priority level and actionable recommendation.
+
+### Ask Questions Page
+
+Type natural language questions about your data:
+- `"What is the total revenue?"` → Calculates the sum
+- `"Show profit by region"` → Groups data and creates a chart
+- `"Top 5 products by revenue"` → Shows the top performers
+- `"Show sales trend"` → Displays a time series chart
+- `"Distribution of profit"` → Shows a histogram
+
+### Export Page
+
+- **Excel Report**: Multi-sheet workbook (Data, Summary, KPIs, Insights)
+- **PDF Report**: Formatted report with KPIs, insights, and statistical summary
+- **Clean Data**: Download the cleaned dataset as CSV or Excel
+
+### History Page
+
+View a timeline of all analysis actions performed during the session. Includes timestamps, action types, and result summaries.
 
 ---
 
-## 📄 License & Evaluation
-Created as an Internship Assignment Submission under the MIT License.
+## 🧪 Testing
+
+Run the integration test suite:
+
+```bash
+python test_dashboard.py
+```
+
+This verifies all 24 features: data loading, cleaning, KPI generation, all chart types, correlation, anomaly detection, trend analysis, distribution analysis, AI insights, NL queries, export, and history.
+
+---
+
+## 📋 Requirements
+
+See `requirements.txt` for full list:
+
+```
+streamlit>=1.28.0
+pandas>=2.0.0
+plotly>=5.18.0
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+fpdf2>=2.7.0
+scipy>=1.11.0
+numpy>=1.24.0
+sqlalchemy>=2.0.0
+```
+
+---
+
+## 🔮 Future Enhancements
+
+- **Ollama/LLM Integration**: Optional local LLM for more advanced natural language processing
+- **Real-time Data**: Connect to live databases and APIs
+- **Custom Dashboards**: Drag-and-drop dashboard builder
+- **Collaboration**: Multi-user support with shared analysis
+- **Automated Reports**: Scheduled report generation and email delivery
+
+---
+
+## 📄 License
+
+This project is created for educational purposes as part of an internship assignment.

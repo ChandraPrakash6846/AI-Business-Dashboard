@@ -1,0 +1,374 @@
+/* ===== AI Business Dashboard - Custom Styles ===== */
+
+/* Main app backgrounds are now handled by .streamlit/config.toml for a cleaner native look */
+
+[data-testid="stSidebar"] .stMarkdown h1,
+[data-testid="stSidebar"] .stMarkdown h2,
+[data-testid="stSidebar"] .stMarkdown h3 {
+    color: #667eea;
+}
+
+/* KPI Card Styles */
+.kpi-container {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+}
+
+.kpi-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin: 8px 0;
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    color: #a0a0c0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.kpi-delta {
+    font-size: 0.85rem;
+    margin-top: 8px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.kpi-delta.positive {
+    background: rgba(0, 200, 100, 0.15);
+    color: #00c864;
+}
+
+.kpi-delta.negative {
+    background: rgba(255, 75, 75, 0.15);
+    color: #ff4b4b;
+}
+
+/* Section Headers */
+.section-header {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, transparent 100%);
+    border-left: 4px solid #667eea;
+    padding: 12px 20px;
+    margin: 24px 0 16px 0;
+    border-radius: 0 8px 8px 0;
+}
+
+.section-header h2 {
+    color: #e0e0ff;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* Insight Cards */
+.insight-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: background 0.3s ease;
+}
+
+.insight-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.insight-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e0e0ff;
+    margin-bottom: 8px;
+}
+
+.insight-detail {
+    font-size: 0.95rem;
+    color: #b0b0d0;
+    line-height: 1.6;
+}
+
+.insight-recommendation {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+/* Data Table Styling */
+.dataframe-container {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Query Box */
+.query-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+}
+
+.query-answer {
+    background: linear-gradient(135deg, rgba(0, 200, 100, 0.08) 0%, rgba(102, 126, 234, 0.08) 100%);
+    border: 1px solid rgba(0, 200, 100, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+}
+
+/* Cleaning Report */
+.cleaning-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 4px;
+}
+
+.cleaning-badge.success {
+    background: rgba(0, 200, 100, 0.15);
+    color: #00c864;
+}
+
+.cleaning-badge.warning {
+    background: rgba(255, 200, 0, 0.15);
+    color: #ffc800;
+}
+
+.cleaning-badge.info {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+}
+
+/* Export Button Styling */
+.export-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.export-btn:hover {
+    transform: scale(1.05);
+}
+
+/* History Timeline */
+.history-item {
+    border-left: 3px solid #667eea;
+    padding: 12px 20px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 0 8px 8px 0;
+}
+
+.history-time {
+    color: #667eea;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.history-action {
+    color: #e0e0ff;
+    font-size: 0.95rem;
+    margin-top: 4px;
+}
+
+/* Welcome Page */
+.welcome-container {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.welcome-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2, #00c864);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    color: #a0a0c0;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+    line-height: 1.6;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.feature-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.feature-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.feature-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e0e0ff;
+    margin-bottom: 8px;
+}
+
+.feature-desc {
+    font-size: 0.85rem;
+    color: #a0a0c0;
+    line-height: 1.5;
+}
+
+/* Anomaly Highlight */
+.anomaly-row {
+    background: rgba(255, 75, 75, 0.1) !important;
+    border-left: 3px solid #ff4b4b;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .kpi-card {
+        min-width: 140px;
+        padding: 16px;
+    }
+    .kpi-value {
+        font-size: 1.5rem;
+    }
+    .welcome-title {
+        font-size: 2rem;
+    }
+}
+
+/* Streamlit overrides for dark theme consistency */
+.stMetric {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px 8px 0 0;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    padding: 8px 20px;
+    color: #a0a0c0;
+}
+
+.stTabs [aria-selected="true"] {
+    background: rgba(102, 126, 234, 0.15) !important;
+    color: #667eea !important;
+    border-bottom: 2px solid #667eea;
+}
+
+/* Plotly chart container */
+.js-plotly-plot {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+}
+
+/* Increase base text sizes */
+html, body, .stApp {
+    font-size: 1.1rem;
+}
+
+/* Make headers more prominent */
+h1 { font-size: 1.5rem !important; }
+h2 { font-size: 1.5rem !important; }
+h3 { font-size: 1.5rem !important; }
+
+/* Increase standard text elements */
+.stMarkdown p, .stMarkdown li {
+    font-size: 1.15rem;
+    line-height: 1.6;
+}
+
+/* Make the sidebar slightly larger too */
+[data-testid=\
+
+stSidebar\] .stMarkdown p {
+    font-size: 1.1rem;
+}
+
+
+
+
+/* --- ADJUSTED HEADING SIZES --- */
+h1 { font-size: 2.2rem !important; margin-bottom: 1rem !important; }
+h2 { font-size: 1.8rem !important; margin-bottom: 0.8rem !important; }
+h3 { font-size: 1.4rem !important; margin-bottom: 0.6rem !important; }
+.section-header h2 { font-size: 1.5rem !important; }
+[data-testid="stMetricValue"] { font-size: 1.8rem !important; }
